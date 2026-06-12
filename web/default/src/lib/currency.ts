@@ -150,6 +150,14 @@ function getConfig(): CurrencyConfig {
       currency?.quotaPerUnit && currency.quotaPerUnit > 0
         ? currency.quotaPerUnit
         : DEFAULT_CURRENCY_CONFIG.quotaPerUnit,
+    cnyExchangeRate:
+      currency?.cnyExchangeRate && currency.cnyExchangeRate > 0
+        ? currency.cnyExchangeRate
+        : DEFAULT_CURRENCY_CONFIG.cnyExchangeRate,
+    rubExchangeRate:
+      currency?.rubExchangeRate && currency.rubExchangeRate > 0
+        ? currency.rubExchangeRate
+        : DEFAULT_CURRENCY_CONFIG.rubExchangeRate,
     usdExchangeRate:
       currency?.usdExchangeRate && currency.usdExchangeRate > 0
         ? currency.usdExchangeRate
@@ -172,14 +180,14 @@ function getDisplayMeta(config: CurrencyConfig): DisplayMeta {
         kind: 'currency',
         symbol: '¥',
         currencyCode: 'CNY',
-        exchangeRate: config.usdExchangeRate,
+        exchangeRate: config.cnyExchangeRate,
       }
     case 'RUB':
       return {
         kind: 'currency',
         symbol: '₽',
         currencyCode: 'RUB',
-        exchangeRate: config.usdExchangeRate,
+        exchangeRate: config.rubExchangeRate,
       }
     case 'CUSTOM':
       return {

@@ -35,10 +35,24 @@ export function usePricingData() {
     () => Math.max((status?.price as number) ?? 1, 0.001),
     [status?.price]
   )
-  const usdExchangeRate = useMemo(
-    () => Math.max((status?.usd_exchange_rate as number) ?? priceRate, 0.001),
-    [status?.usd_exchange_rate, priceRate]
-  )
+  // Pick the correct exchange rate based on display currency type
+  const usdExchangeRate = useMemo(() => {
+    const displayType = status?.quota_display_type as string | undefined
+    if (displayType === 'CNY') {
+      return Math.max(
+        (status?.cny_exchange_rate as number) ?? (status?.usd_exchange_rate as number) ?? priceRate,
+        0.001
+      )
+    }
+    if (displayType === 'RUB') {
+      return Math.max(
+        (status?.rub_exchange_rate as number) ?? (status?.usd_exchange_rate as number) ?? priceRate,
+        0.001
+      )
+    }
+    // USD / TOKENS / CUSTOM / fallback
+    return Math.max((status?.usd_exchange_rate as number) ?? priceRate, 0.001)
+  }, [status?.quota_display_type, status?.cny_exchange_rate, status?.rub_exchange_rate, status?.usd_exchange_rate, priceRate])
 
   const models = useMemo(() => {
     if (!data?.data || !data?.vendors) return []

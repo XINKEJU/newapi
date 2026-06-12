@@ -97,6 +97,8 @@ func GetStatus(c *gin.Context) {
 		"default_use_auto_group":        setting.DefaultUseAutoGroup,
 
 		"usd_exchange_rate": operation_setting.USDExchangeRate,
+		"cny_exchange_rate": operation_setting.CNYExchangeRate,
+		"rub_exchange_rate": operation_setting.RUBExchangeRate,
 		"price":             operation_setting.Price,
 		"stripe_unit_price": setting.StripeUnitPrice,
 

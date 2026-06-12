@@ -15,7 +15,9 @@ var EpayId = ""
 var EpayKey = ""
 var Price = 90.0
 var MinTopUp = 1
-var USDExchangeRate = 90.0
+var USDExchangeRate = 7.25    // 1 USD = 7.25 CNY（原值 90 是 RUB 汇率，现已拆分）
+var CNYExchangeRate = 7.25    // 1 USD = X CNY
+var RUBExchangeRate = 90.0    // 1 USD = X RUB
 
 var PayMethods = []map[string]string{
 	{

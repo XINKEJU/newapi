@@ -122,6 +122,8 @@ export interface SystemStatus {
     display_token_stat_enabled?: boolean
     quota_per_unit?: number
     quota_display_type?: string
+    cny_exchange_rate?: number
+    rub_exchange_rate?: number
     usd_exchange_rate?: number
     custom_currency_symbol?: string
     custom_currency_exchange_rate?: number

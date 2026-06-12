@@ -29,7 +29,11 @@ export interface CurrencyConfig {
   quotaDisplayType: CurrencyDisplayType
   /** Number of quota units that equal one USD */
   quotaPerUnit: number
-  /** Exchange rate from USD to the configured local currency */
+  /** Exchange rate from USD to CNY (1 USD = X CNY) */
+  cnyExchangeRate: number
+  /** Exchange rate from USD to RUB (1 USD = X RUB) */
+  rubExchangeRate: number
+  /** Legacy: exchange rate from USD to local currency (deprecated, use cny/rub specific rates) */
   usdExchangeRate: number
   /** Custom currency symbol configured by the admin (used when type === CUSTOM) */
   customCurrencySymbol: string
@@ -48,9 +52,11 @@ export interface SystemConfig {
 
 export const DEFAULT_CURRENCY_CONFIG: CurrencyConfig = {
   displayInCurrency: true,
-  quotaDisplayType: 'USD',
+  quotaDisplayType: 'RUB',
   quotaPerUnit: 500000,
-  usdExchangeRate: 1,
+  cnyExchangeRate: 7.25,
+  rubExchangeRate: 90,
+  usdExchangeRate: 7.25,
   customCurrencySymbol: '¤',
   customCurrencyExchangeRate: 1,
 }

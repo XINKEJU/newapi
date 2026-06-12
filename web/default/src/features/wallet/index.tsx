@@ -78,12 +78,15 @@ export function Wallet(props: WalletProps) {
   const { currency } = useSystemConfig()
   const { topupInfo, presetAmounts, loading: topupLoading } = useTopupInfo()
 
-  // Calculate effective exchange rate - when display type is USD, use rate of 1
+  // Calculate effective exchange rate based on display currency type
   const effectiveUsdExchangeRate = useMemo(() => {
-    return currency?.quotaDisplayType === 'USD'
-      ? 1
-      : currency?.usdExchangeRate || 1
-  }, [currency?.quotaDisplayType, currency?.usdExchangeRate])
+    const type = currency?.quotaDisplayType
+    if (type === 'USD') return 1
+    if (type === 'CNY') return currency?.cnyExchangeRate || 7.25
+    if (type === 'RUB') return currency?.rubExchangeRate || 90
+    if (type === 'CUSTOM') return currency?.customCurrencyExchangeRate || 1
+    return currency?.usdExchangeRate || 1 // fallback for legacy/unknown
+  }, [currency?.quotaDisplayType, currency?.cnyExchangeRate, currency?.rubExchangeRate, currency?.usdExchangeRate, currency?.customCurrencyExchangeRate])
   const {
     amount: paymentAmount,
     calculating,
