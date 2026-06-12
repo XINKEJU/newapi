@@ -150,6 +150,10 @@ export interface TopupInfo {
   enable_waffo_pancake_topup?: boolean
   /** Minimum topup amount for Waffo Pancake */
   waffo_pancake_min_topup?: number
+  /** Whether YooMoney topup is enabled */
+  enable_yoomoney_topup?: boolean
+  /** Minimum topup amount for YooMoney */
+  yoomoney_min_topup?: number
   /** Whether redemption code usage is enabled */
   enable_redemption?: boolean
   /** Whether compliance confirmation has been completed */
@@ -203,6 +207,25 @@ export interface WaffoPancakePaymentRequest {
   /** Topup amount */
   amount: number
 }
+
+/**
+ * YooMoney payment request parameters
+ */
+export interface YooMoneyPaymentRequest {
+  /** Topup amount */
+  amount: number
+  /** Payment method (yoomoney) */
+  payment_method: 'yoomoney'
+}
+
+/**
+ * YooMoney payment response
+ */
+export type YooMoneyPaymentResponse = ApiResponse<{
+  pay_url?: string
+  order_id?: string
+  plan_title?: string
+}>
 
 /**
  * Amount calculation request

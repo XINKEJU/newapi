@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"embed"
 	"fmt"
 	"log"
 	"net/http"
@@ -35,17 +33,7 @@ import (
 	_ "net/http/pprof"
 )
 
-//go:embed web/default/dist
-var buildFS embed.FS
 
-//go:embed web/default/dist/index.html
-var indexPage []byte
-
-//go:embed web/classic/dist
-var classicBuildFS embed.FS
-
-//go:embed web/classic/dist/index.html
-var classicIndexPage []byte
 
 func main() {
 	startTime := time.Now()
@@ -55,6 +43,8 @@ func main() {
 		common.FatalLog("failed to initialize resources: " + err.Error())
 		return
 	}
+
+	model.InitRootUser()
 
 	common.SysLog("New API " + common.Version + " started")
 	if os.Getenv("GIN_MODE") != "debug" {
@@ -191,10 +181,6 @@ func main() {
 
 	// 设置路由
 	router.SetRouter(server, router.ThemeAssets{
-		DefaultBuildFS:   buildFS,
-		DefaultIndexPage: indexPage,
-		ClassicBuildFS:   classicBuildFS,
-		ClassicIndexPage: classicIndexPage,
 	})
 	var port = os.Getenv("PORT")
 	if port == "" {
@@ -226,9 +212,9 @@ func InjectUmamiAnalytics() {
 	}
 	analyticsInjectBuilder.WriteString("<!--Umami QuantumNous-->\n")
 	analyticsInject := []byte(analyticsInjectBuilder.String())
-	placeholder := []byte("<!--umami-->\n")
-	indexPage = bytes.ReplaceAll(indexPage, placeholder, analyticsInject)
-	classicIndexPage = bytes.ReplaceAll(classicIndexPage, placeholder, analyticsInject)
+	_ = analyticsInject
+	// indexPage = bytes.ReplaceAll(indexPage, placeholder, analyticsInject) // 前端未构建，暂时注释
+	// classicIndexPage = bytes.ReplaceAll(classicIndexPage, placeholder, analyticsInject) // classic 前端未构建，暂时注释
 }
 
 func InjectGoogleAnalytics() {
@@ -250,9 +236,11 @@ func InjectGoogleAnalytics() {
 	}
 	analyticsInjectBuilder.WriteString("<!--Google Analytics QuantumNous-->\n")
 	analyticsInject := []byte(analyticsInjectBuilder.String())
-	placeholder := []byte("<!--Google Analytics-->\n")
-	indexPage = bytes.ReplaceAll(indexPage, placeholder, analyticsInject)
-	classicIndexPage = bytes.ReplaceAll(classicIndexPage, placeholder, analyticsInject)
+	_ = analyticsInject
+	// placeholder := []byte("<!--Google Analytics-->\n") // 前端未构建，暂时注释
+	_ = analyticsInject
+	// indexPage = bytes.ReplaceAll(indexPage, placeholder, analyticsInject) // 前端未构建，暂时注释
+	// classicIndexPage = bytes.ReplaceAll(classicIndexPage, placeholder, analyticsInject) // classic 前端未构建，暂时注释
 }
 
 func InitResources() error {

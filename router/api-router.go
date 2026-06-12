@@ -61,6 +61,16 @@ func SetApiRouter(router *gin.Engine) {
 		// in Pancake's matching webhook slot; handler enforces env match.
 		apiRouter.POST("/waffo-pancake/webhook/:env", anonymousRequestBodyLimit, controller.WaffoPancakeWebhook)
 
+		// YooMoney（俄罗斯本地支付）路由
+		yoomoneyTopUp := apiRouter.Group("/yoomoney")
+		{
+			yoomoneyTopUp.POST("/topup", anonymousRequestBodyLimit, controller.RequestYooMoneyTopUp)
+			yoomoneyTopUp.POST("/subscription", anonymousRequestBodyLimit, controller.RequestYooMoneySubscription)
+			yoomoneyTopUp.Any("/notify", anonymousRequestBodyLimit, controller.YooMoneyNotify)
+			yoomoneyTopUp.GET("/return", controller.YooMoneyReturn)
+			yoomoneyTopUp.GET("/subscription/return", controller.YooMoneySubscriptionReturn)
+		}
+
 		// Universal secure verification routes
 		apiRouter.POST("/verify", middleware.UserAuth(), middleware.CriticalRateLimit(), controller.UniversalVerify)
 

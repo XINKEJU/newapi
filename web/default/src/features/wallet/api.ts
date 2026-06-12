@@ -233,3 +233,45 @@ export async function completeOrder(
   const res = await api.post('/api/user/topup/complete', request)
   return res.data
 }
+
+/**
+ * Calculate payment amount for YooMoney payment
+ */
+export async function calculateYooMoneyAmount(
+  request: AmountRequest
+): Promise<AmountResponse> {
+  const res = await api.post('/api/yoomoney/amount', request, {
+    skipBusinessError: true,
+  } as Record<string, unknown>)
+  return res.data
+}
+
+/**
+ * Request YooMoney topup payment
+ */
+export async function requestYooMoneyPayment(
+  request: Record<string, unknown>
+): Promise<YooMoneyPaymentResponse> {
+  const res = await api.post('/api/yoomoney/topup', request, {
+    skipBusinessError: true,
+  } as Record<string, unknown>)
+  return {
+    ...res.data,
+    url: res.data?.pay_url || (res as unknown as { url?: string }).url,
+  }
+}
+
+/**
+ * Request YooMoney subscription payment
+ */
+export async function requestYooMoneySubscription(
+  request: Record<string, unknown>
+): Promise<YooMoneyPaymentResponse> {
+  const res = await api.post('/api/yoomoney/subscription', request, {
+    skipBusinessError: true,
+  } as Record<string, unknown>)
+  return {
+    ...res.data,
+    url: res.data?.pay_url || (res as unknown as { url?: string }).url,
+  }
+}

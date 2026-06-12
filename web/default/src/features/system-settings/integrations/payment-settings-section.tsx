@@ -159,6 +159,13 @@ const paymentSchema = z.object({
   WaffoPancakeMerchantID: z.string(),
   WaffoPancakePrivateKey: z.string(),
   WaffoPancakeReturnURL: z.string(),
+  YoomoneyEnabled: z.boolean(),
+  YoomoneyWalletId: z.string(),
+  YoomoneyApiKey: z.string(),
+  YoomoneyNotifySecret: z.string(),
+  YoomoneyTestMode: z.boolean(),
+  YoomoneyCurrency: z.string(),
+  YoomoneyMinTopUp: z.coerce.number().min(0),
 })
 
 type PaymentFormValues = z.infer<typeof paymentSchema>
@@ -439,6 +446,13 @@ export function PaymentSettingsSection({
       WaffoPancakeReturnURL: removeTrailingSlash(
         values.WaffoPancakeReturnURL.trim()
       ),
+      YoomoneyEnabled: values.YoomoneyEnabled,
+      YoomoneyWalletId: values.YoomoneyWalletId.trim(),
+      YoomoneyApiKey: values.YoomoneyApiKey.trim(),
+      YoomoneyNotifySecret: values.YoomoneyNotifySecret.trim(),
+      YoomoneyTestMode: values.YoomoneyTestMode,
+      YoomoneyCurrency: values.YoomoneyCurrency.trim() || 'RUB',
+      YoomoneyMinTopUp: values.YoomoneyMinTopUp,
     }
 
     const initial = {
@@ -486,6 +500,13 @@ export function PaymentSettingsSection({
       WaffoPancakeReturnURL: removeTrailingSlash(
         initialRef.current.WaffoPancakeReturnURL.trim()
       ),
+      YoomoneyEnabled: initialRef.current.YoomoneyEnabled,
+      YoomoneyWalletId: initialRef.current.YoomoneyWalletId.trim(),
+      YoomoneyApiKey: initialRef.current.YoomoneyApiKey.trim(),
+      YoomoneyNotifySecret: initialRef.current.YoomoneyNotifySecret.trim(),
+      YoomoneyTestMode: initialRef.current.YoomoneyTestMode,
+      YoomoneyCurrency: initialRef.current.YoomoneyCurrency.trim() || 'RUB',
+      YoomoneyMinTopUp: initialRef.current.YoomoneyMinTopUp,
     }
 
     const updates: Array<{ key: string; value: string | number | boolean }> = []
@@ -681,6 +702,35 @@ export function PaymentSettingsSection({
       normalizeJsonForComparison(initial.WaffoPayMethods)
     ) {
       updates.push({ key: 'WaffoPayMethods', value: sanitized.WaffoPayMethods })
+    }
+
+    // YooMoney 配置更新
+    if (sanitized.YoomoneyEnabled !== initial.YoomoneyEnabled) {
+      updates.push({ key: 'YoomoneyEnabled', value: sanitized.YoomoneyEnabled })
+    }
+
+    if (sanitized.YoomoneyWalletId !== initial.YoomoneyWalletId) {
+      updates.push({ key: 'YoomoneyWalletId', value: sanitized.YoomoneyWalletId })
+    }
+
+    if (sanitized.YoomoneyApiKey && sanitized.YoomoneyApiKey !== initial.YoomoneyApiKey) {
+      updates.push({ key: 'YoomoneyApiKey', value: sanitized.YoomoneyApiKey })
+    }
+
+    if (sanitized.YoomoneyNotifySecret && sanitized.YoomoneyNotifySecret !== initial.YoomoneyNotifySecret) {
+      updates.push({ key: 'YoomoneyNotifySecret', value: sanitized.YoomoneyNotifySecret })
+    }
+
+    if (sanitized.YoomoneyTestMode !== initial.YoomoneyTestMode) {
+      updates.push({ key: 'YoomoneyTestMode', value: sanitized.YoomoneyTestMode })
+    }
+
+    if (sanitized.YoomoneyCurrency !== initial.YoomoneyCurrency) {
+      updates.push({ key: 'YoomoneyCurrency', value: sanitized.YoomoneyCurrency })
+    }
+
+    if (sanitized.YoomoneyMinTopUp !== initial.YoomoneyMinTopUp) {
+      updates.push({ key: 'YoomoneyMinTopUp', value: sanitized.YoomoneyMinTopUp })
     }
 
     const hasWaffoPancakeChanges =
@@ -1510,6 +1560,192 @@ export function PaymentSettingsSection({
                 </FormItem>
               )}
             />
+          </div>
+
+          <Separator />
+
+          <div className='space-y-4'>
+            <div>
+              <h3 className='text-lg font-medium'>{t('YooMoney Gateway')}</h3>
+              <p className='text-muted-foreground text-sm'>
+                {t('Configuration for YooMoney payment integration (Russia)')}
+              </p>
+            </div>
+
+            <div className='rounded-md bg-yellow-50 p-4 text-sm text-yellow-900 dark:bg-yellow-950 dark:text-yellow-100'>
+              <p className='mb-2 font-medium'>{t('Webhook Configuration:')}</p>
+              <ul className='list-inside list-disc space-y-1'>
+                <li>
+                  {t('Webhook URL:')}{' '}
+                  <code className='rounded bg-yellow-100 px-1 py-0.5 text-xs dark:bg-yellow-900'>
+                    {'<ServerAddress>/api/yoomoney/notify'}
+                  </code>
+                </li>
+                <li>{t('Notification signature:')}{' '}
+                  <code className='rounded bg-yellow-100 px-1 py-0.5 text-xs dark:bg-yellow-900'>
+                    SHA1(notification_type&amount&currency&wallet_id&transaction_id&label&notification_secret)
+                  </code>
+                </li>
+              </ul>
+            </div>
+
+            <FormField
+              control={form.control}
+              name='YoomoneyEnabled'
+              render={({ field }) => (
+                <SettingsSwitchItem>
+                  <SettingsSwitchContent>
+                    <FormLabel>{t('Enable YooMoney')}</FormLabel>
+                    <FormDescription>
+                      {t('Enable YooMoney payment gateway')}
+                    </FormDescription>
+                  </SettingsSwitchContent>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </SettingsSwitchItem>
+              )}
+            />
+
+            <div className='grid gap-6 md:grid-cols-2'>
+              <FormField
+                control={form.control}
+                name='YoomoneyWalletId'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Wallet ID')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t('Your YooMoney wallet number')}
+                        {...field}
+                        onChange={(event) => field.onChange(event.target.value)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t('YooMoney wallet number (receiver)')}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='YoomoneyCurrency'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Currency')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='RUB'
+                        {...field}
+                        onChange={(event) => field.onChange(event.target.value)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t('Currency code (RUB, USD, etc.)')}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className='grid gap-6 md:grid-cols-2'>
+              <FormField
+                control={form.control}
+                name='YoomoneyApiKey'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('API Key (optional)')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='password'
+                        placeholder={t('Enter API key')}
+                        autoComplete='new-password'
+                        {...field}
+                        onChange={(event) => field.onChange(event.target.value)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t('YooMoney API key (leave blank unless updating)')}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='YoomoneyNotifySecret'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Notification Secret')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='password'
+                        placeholder={t('Enter notification secret')}
+                        autoComplete='new-password'
+                        {...field}
+                        onChange={(event) => field.onChange(event.target.value)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t('Secret for webhook signature verification')}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className='grid gap-6 md:grid-cols-2'>
+              <FormField
+                control={form.control}
+                name='YoomoneyTestMode'
+                render={({ field }) => (
+                  <SettingsSwitchItem>
+                    <SettingsSwitchContent>
+                      <FormLabel>{t('Test Mode')}</FormLabel>
+                      <FormDescription>
+                        {t('Enable test mode for YooMoney')}
+                      </FormDescription>
+                    </SettingsSwitchContent>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </SettingsSwitchItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='YoomoneyMinTopUp'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Minimum top-up')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        step='1'
+                        min={0}
+                        {...safeNumberFieldProps(field)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t('Minimum recharge amount')}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
 
           <Separator />

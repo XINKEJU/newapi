@@ -1069,3 +1069,29 @@ func RootUserExists() bool {
 	}
 	return true
 }
+
+// InitRootUser 如果不存在 root 用户，则自动创建一个
+// 用户名: admin, 密码: admin123
+func InitRootUser() {
+	if RootUserExists() {
+		return
+	}
+	common.SysLog("no root user found, creating default root user (admin/admin123)")
+	hashedPassword, err := common.Password2Hash("admin123")
+	if err != nil {
+		common.FatalLog("failed to create root user: " + err.Error())
+		return
+	}
+	rootUser := &User{
+		Username: "admin",
+		Password: hashedPassword,
+		Role:     common.RoleRootUser,
+		Status:   common.UserStatusEnabled,
+		Quota:    500000,
+	}
+	if err := DB.Create(rootUser).Error; err != nil {
+		common.FatalLog("failed to create root user: " + err.Error())
+		return
+	}
+	common.SysLog("default root user created: admin / admin123")
+}

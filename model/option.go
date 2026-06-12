@@ -114,6 +114,14 @@ func InitOptionMap() {
 	common.OptionMap["WaffoPancakeMinTopUp"] = strconv.Itoa(setting.WaffoPancakeMinTopUp)
 	common.OptionMap["WaffoPancakeStoreID"] = setting.WaffoPancakeStoreID
 	common.OptionMap["WaffoPancakeProductID"] = setting.WaffoPancakeProductID
+	// YooMoney 支付配置
+	common.OptionMap["YoomoneyEnabled"] = strconv.FormatBool(setting.YoomoneyEnabled)
+	common.OptionMap["YoomoneyWalletId"] = setting.YoomoneyWalletId
+	common.OptionMap["YoomoneyApiKey"] = setting.YoomoneyApiKey
+	common.OptionMap["YoomoneyNotifySecret"] = setting.YoomoneyNotifySecret
+	common.OptionMap["YoomoneyTestMode"] = strconv.FormatBool(setting.YoomoneyTestMode)
+	common.OptionMap["YoomoneyCurrency"] = setting.YoomoneyCurrency
+	common.OptionMap["YoomoneyMinTopUp"] = strconv.Itoa(setting.YoomoneyMinTopUp)
 	common.OptionMap["TopupGroupRatio"] = common.TopupGroupRatio2JSONString()
 	common.OptionMap["Chats"] = setting.Chats2JsonString()
 	common.OptionMap["AutoGroups"] = setting.AutoGroups2JsonString()
@@ -182,6 +190,8 @@ func InitOptionMap() {
 
 	common.OptionMapRWMutex.Unlock()
 	loadOptionsFromDatabase()
+	// 环境变量覆盖数据库配置（环境变量优先）
+	setting.InitYoomoneyFromEnv()
 }
 
 func loadOptionsFromDatabase() {
@@ -199,6 +209,8 @@ func SyncOptions(frequency int) {
 		time.Sleep(time.Duration(frequency) * time.Second)
 		common.SysLog("syncing options from database")
 		loadOptionsFromDatabase()
+		// 环境变量覆盖数据库配置（环境变量优先）
+		setting.InitYoomoneyFromEnv()
 	}
 }
 
@@ -462,6 +474,21 @@ func updateOptionMap(key string, value string) (err error) {
 		setting.WaffoPancakeUnitPrice, _ = strconv.ParseFloat(value, 64)
 	case "WaffoPancakeMinTopUp":
 		setting.WaffoPancakeMinTopUp, _ = strconv.Atoi(value)
+	// YooMoney 支付配置
+	case "YoomoneyEnabled":
+		setting.YoomoneyEnabled = value == "true"
+	case "YoomoneyWalletId":
+		setting.YoomoneyWalletId = value
+	case "YoomoneyApiKey":
+		setting.YoomoneyApiKey = value
+	case "YoomoneyNotifySecret":
+		setting.YoomoneyNotifySecret = value
+	case "YoomoneyTestMode":
+		setting.YoomoneyTestMode = value == "true"
+	case "YoomoneyCurrency":
+		setting.YoomoneyCurrency = value
+	case "YoomoneyMinTopUp":
+		setting.YoomoneyMinTopUp, _ = strconv.Atoi(value)
 	case "TopupGroupRatio":
 		err = common.UpdateTopupGroupRatioByJSONString(value)
 	case "GitHubClientId":
