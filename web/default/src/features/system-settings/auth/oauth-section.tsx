@@ -77,6 +77,12 @@ const oauthSchema = z.object({
   LinuxDOClientId: z.string(),
   LinuxDOClientSecret: z.string(),
   LinuxDOMinimumTrustLevel: z.string(),
+  VKOAuthEnabled: z.boolean(),
+  VKClientId: z.string(),
+  VKClientSecret: z.string(),
+  YandexOAuthEnabled: z.boolean(),
+  YandexClientId: z.string(),
+  YandexClientSecret: z.string(),
   WeChatAuthEnabled: z.boolean(),
   WeChatServerAddress: z.string(),
   WeChatServerToken: z.string(),
@@ -106,6 +112,12 @@ type FlatOAuthDefaults = {
   LinuxDOClientId: string
   LinuxDOClientSecret: string
   LinuxDOMinimumTrustLevel: string
+  VKOAuthEnabled: boolean
+  VKClientId: string
+  VKClientSecret: string
+  YandexOAuthEnabled: boolean
+  YandexClientId: string
+  YandexClientSecret: string
   WeChatAuthEnabled: boolean
   WeChatServerAddress: string
   WeChatServerToken: string
@@ -144,6 +156,12 @@ const buildFormDefaults = (defaults: FlatOAuthDefaults): OAuthFormValues => ({
   WeChatServerAddress: defaults.WeChatServerAddress ?? '',
   WeChatServerToken: defaults.WeChatServerToken ?? '',
   WeChatAccountQRCodeImageURL: defaults.WeChatAccountQRCodeImageURL ?? '',
+  VKOAuthEnabled: defaults.VKOAuthEnabled,
+  VKClientId: defaults.VKClientId ?? '',
+  VKClientSecret: defaults.VKClientSecret ?? '',
+  YandexOAuthEnabled: defaults.YandexOAuthEnabled,
+  YandexClientId: defaults.YandexClientId ?? '',
+  YandexClientSecret: defaults.YandexClientSecret ?? '',
 })
 
 const normalizeFormValues = (values: OAuthFormValues): FlatOAuthDefaults => ({
@@ -171,6 +189,12 @@ const normalizeFormValues = (values: OAuthFormValues): FlatOAuthDefaults => ({
   WeChatServerAddress: values.WeChatServerAddress,
   WeChatServerToken: values.WeChatServerToken,
   WeChatAccountQRCodeImageURL: values.WeChatAccountQRCodeImageURL,
+  VKOAuthEnabled: values.VKOAuthEnabled,
+  VKClientId: values.VKClientId,
+  VKClientSecret: values.VKClientSecret,
+  YandexOAuthEnabled: values.YandexOAuthEnabled,
+  YandexClientId: values.YandexClientId,
+  YandexClientSecret: values.YandexClientSecret,
 })
 
 type OAuthSectionProps = {
@@ -294,11 +318,13 @@ export function OAuthSection(props: OAuthSectionProps) {
             <FormDirtyIndicator isDirty={form.formState.isDirty} />
 
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className='grid w-full grid-cols-6'>
+              <TabsList className='grid w-full grid-cols-8'>
                 <TabsTrigger value='github'>{t('GitHub')}</TabsTrigger>
                 <TabsTrigger value='discord'>{t('Discord')}</TabsTrigger>
                 <TabsTrigger value='oidc'>{t('OIDC')}</TabsTrigger>
                 <TabsTrigger value='telegram'>{t('Telegram')}</TabsTrigger>
+                <TabsTrigger value='vk'>{t('VK')}</TabsTrigger>
+                <TabsTrigger value='yandex'>{t('Yandex')}</TabsTrigger>
                 <TabsTrigger value='linuxdo'>{t('LinuxDO')}</TabsTrigger>
                 <TabsTrigger value='wechat'>{t('WeChat')}</TabsTrigger>
               </TabsList>
@@ -684,6 +710,150 @@ export function OAuthSection(props: OAuthSectionProps) {
                         <Input
                           placeholder={t('Your Bot Name')}
                           autoComplete='off'
+                          value={field.value ?? ''}
+                          onChange={(event) =>
+                            field.onChange(event.target.value)
+                          }
+                          name={field.name}
+                          onBlur={field.onBlur}
+                          ref={field.ref}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </TabsContent>
+
+              <TabsContent value='vk' className={oauthTabContentClassName}>
+                <FormField
+                  control={form.control}
+                  name='VKOAuthEnabled'
+                  render={({ field }) => (
+                    <SettingsSwitchItem>
+                      <SettingsSwitchContent>
+                        <FormLabel>{t('Enable VK OAuth')}</FormLabel>
+                        <FormDescription>
+                          {t('Allow users to sign in with VK (ВКонтакте)')}
+                        </FormDescription>
+                      </SettingsSwitchContent>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </SettingsSwitchItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name='VKClientId'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('VK App ID')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={t('Your VK Application ID')}
+                          autoComplete='off'
+                          value={field.value ?? ''}
+                          onChange={(event) =>
+                            field.onChange(event.target.value)
+                          }
+                          name={field.name}
+                          onBlur={field.onBlur}
+                          ref={field.ref}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name='VKClientSecret'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('VK Secure Key')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='password'
+                          placeholder={t('Your VK Secure Key')}
+                          autoComplete='new-password'
+                          value={field.value ?? ''}
+                          onChange={(event) =>
+                            field.onChange(event.target.value)
+                          }
+                          name={field.name}
+                          onBlur={field.onBlur}
+                          ref={field.ref}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </TabsContent>
+
+              <TabsContent value='yandex' className={oauthTabContentClassName}>
+                <FormField
+                  control={form.control}
+                  name='YandexOAuthEnabled'
+                  render={({ field }) => (
+                    <SettingsSwitchItem>
+                      <SettingsSwitchContent>
+                        <FormLabel>{t('Enable Yandex ID OAuth')}</FormLabel>
+                        <FormDescription>
+                          {t('Allow users to sign in with Yandex ID')}
+                        </FormDescription>
+                      </SettingsSwitchContent>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </SettingsSwitchItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name='YandexClientId'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('Yandex Client ID')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={t('Your Yandex Application ID')}
+                          autoComplete='off'
+                          value={field.value ?? ''}
+                          onChange={(event) =>
+                            field.onChange(event.target.value)
+                          }
+                          name={field.name}
+                          onBlur={field.onBlur}
+                          ref={field.ref}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name='YandexClientSecret'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('Yandex Client Secret')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='password'
+                          placeholder={t('Your Yandex Client Secret')}
+                          autoComplete='new-password'
                           value={field.value ?? ''}
                           onChange={(event) =>
                             field.onChange(event.target.value)

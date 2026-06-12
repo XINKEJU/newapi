@@ -6,6 +6,7 @@ import "github.com/QuantumNous/new-api/setting/config"
 const (
 	QuotaDisplayTypeUSD    = "USD"
 	QuotaDisplayTypeCNY    = "CNY"
+	QuotaDisplayTypeRUB    = "RUB"
 	QuotaDisplayTypeTokens = "TOKENS"
 	QuotaDisplayTypeCustom = "CUSTOM"
 )
@@ -27,7 +28,7 @@ var generalSetting = GeneralSetting{
 	DocsLink:                   "https://docs.newapi.pro",
 	PingIntervalEnabled:        false,
 	PingIntervalSeconds:        60,
-	QuotaDisplayType:           QuotaDisplayTypeUSD,
+	QuotaDisplayType:           QuotaDisplayTypeRUB,
 	CustomCurrencySymbol:       "¤",
 	CustomCurrencyExchangeRate: 1.0,
 }
@@ -63,6 +64,8 @@ func GetCurrencySymbol() string {
 		return "$"
 	case QuotaDisplayTypeCNY:
 		return "¥"
+	case QuotaDisplayTypeRUB:
+		return "₽"
 	case QuotaDisplayTypeCustom:
 		if generalSetting.CustomCurrencySymbol != "" {
 			return generalSetting.CustomCurrencySymbol
@@ -79,6 +82,8 @@ func GetUsdToCurrencyRate(usdToCny float64) float64 {
 	case QuotaDisplayTypeUSD:
 		return 1
 	case QuotaDisplayTypeCNY:
+		return usdToCny
+	case QuotaDisplayTypeRUB:
 		return usdToCny
 	case QuotaDisplayTypeCustom:
 		if generalSetting.CustomCurrencyExchangeRate > 0 {

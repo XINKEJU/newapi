@@ -180,4 +180,17 @@ func initConstantEnv() {
 		}
 	}
 	constant.TrustedRedirectDomains = trustedDomains
+
+	// OAuth — 第三方社交平台登录
+	TelegramOAuthEnabled = GetEnvOrDefaultBool("TELEGRAM_OAUTH_ENABLED", false)
+	TelegramBotToken = GetEnvOrDefaultString("TELEGRAM_BOT_TOKEN", "")
+	TelegramBotName = GetEnvOrDefaultString("TELEGRAM_BOT_NAME", "")
+
+	VKOAuthEnabled = GetEnvOrDefaultBool("VK_OAUTH_ENABLED", false)
+	VKClientId = GetEnvOrDefaultString("VK_CLIENT_ID", "")
+	VKClientSecret = GetEnvOrDefaultString("VK_CLIENT_SECRET", "")
+
+	YandexOAuthEnabled = GetEnvOrDefaultBool("YANDEX_OAUTH_ENABLED", false)
+	YandexClientId = GetEnvOrDefaultString("YANDEX_CLIENT_ID", "")
+	YandexClientSecret = GetEnvOrDefaultString("YANDEX_CLIENT_SECRET", "")
 }

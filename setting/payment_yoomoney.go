@@ -36,7 +36,7 @@ func getEnvString(key string, defaultVal string) string {
 }
 
 var (
-	YoomoneyEnabled     bool   = getEnvBool("YOOMONEY_ENABLED", false)
+	YoomoneyEnabled     bool   = getEnvBool("YOOMONEY_ENABLED", true)       // Russia localized: default enabled
 	YoomoneyWalletId    string = getEnvString("YOOMONEY_WALLET_ID", "")    // YooMoney 钱包 ID（收款号）
 	YoomoneyApiKey      string = getEnvString("YOOMONEY_API_KEY", "")      // API 密钥（用于签名验证）
 	YoomoneyNotifySecret string = getEnvString("YOOMONEY_NOTIFY_SECRET", "") // 通知密钥（webhook 签名）

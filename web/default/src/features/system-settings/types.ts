@@ -99,6 +99,12 @@ export type AuthSettings = {
   LinuxDOClientId: string
   LinuxDOClientSecret: string
   LinuxDOMinimumTrustLevel: string
+  VKOAuthEnabled: boolean
+  VKClientId: string
+  VKClientSecret: string
+  YandexOAuthEnabled: boolean
+  YandexClientId: string
+  YandexClientSecret: string
   WeChatAuthEnabled: boolean
   WeChatServerAddress: string
   WeChatServerToken: string

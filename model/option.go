@@ -42,6 +42,8 @@ func InitOptionMap() {
 	common.OptionMap["GitHubOAuthEnabled"] = strconv.FormatBool(common.GitHubOAuthEnabled)
 	common.OptionMap["LinuxDOOAuthEnabled"] = strconv.FormatBool(common.LinuxDOOAuthEnabled)
 	common.OptionMap["TelegramOAuthEnabled"] = strconv.FormatBool(common.TelegramOAuthEnabled)
+	common.OptionMap["VKOAuthEnabled"] = strconv.FormatBool(common.VKOAuthEnabled)
+	common.OptionMap["YandexOAuthEnabled"] = strconv.FormatBool(common.YandexOAuthEnabled)
 	common.OptionMap["WeChatAuthEnabled"] = strconv.FormatBool(common.WeChatAuthEnabled)
 	common.OptionMap["TurnstileCheckEnabled"] = strconv.FormatBool(common.TurnstileCheckEnabled)
 	common.OptionMap["RegisterEnabled"] = strconv.FormatBool(common.RegisterEnabled)
@@ -131,6 +133,10 @@ func InitOptionMap() {
 	common.OptionMap["GitHubClientSecret"] = ""
 	common.OptionMap["TelegramBotToken"] = ""
 	common.OptionMap["TelegramBotName"] = ""
+	common.OptionMap["VKClientId"] = ""
+	common.OptionMap["VKClientSecret"] = ""
+	common.OptionMap["YandexClientId"] = ""
+	common.OptionMap["YandexClientSecret"] = ""
 	common.OptionMap["WeChatServerAddress"] = ""
 	common.OptionMap["WeChatServerToken"] = ""
 	common.OptionMap["WeChatAccountQRCodeImageURL"] = ""
@@ -304,6 +310,10 @@ func updateOptionMap(key string, value string) (err error) {
 			common.WeChatAuthEnabled = boolValue
 		case "TelegramOAuthEnabled":
 			common.TelegramOAuthEnabled = boolValue
+		case "VKOAuthEnabled":
+			common.VKOAuthEnabled = boolValue
+		case "YandexOAuthEnabled":
+			common.YandexOAuthEnabled = boolValue
 		case "TurnstileCheckEnabled":
 			common.TurnstileCheckEnabled = boolValue
 		case "RegisterEnabled":
@@ -517,6 +527,14 @@ func updateOptionMap(key string, value string) (err error) {
 		common.TelegramBotToken = value
 	case "TelegramBotName":
 		common.TelegramBotName = value
+	case "VKClientId":
+		common.VKClientId = value
+	case "VKClientSecret":
+		common.VKClientSecret = value
+	case "YandexClientId":
+		common.YandexClientId = value
+	case "YandexClientSecret":
+		common.YandexClientSecret = value
 	case "TurnstileSiteKey":
 		common.TurnstileSiteKey = value
 	case "TurnstileSecretKey":

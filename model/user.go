@@ -35,6 +35,8 @@ type User struct {
 	OidcId           string         `json:"oidc_id" gorm:"column:oidc_id;index"`
 	WeChatId         string         `json:"wechat_id" gorm:"column:wechat_id;index"`
 	TelegramId       string         `json:"telegram_id" gorm:"column:telegram_id;index"`
+	VkId             string         `json:"vk_id" gorm:"column:vk_id;index"`
+	YandexId         string         `json:"yandex_id" gorm:"column:yandex_id;index"`
 	VerificationCode string         `json:"verification_code" gorm:"-:all"`                         // this field is only for Email verification, don't save it to database!
 	AccessToken      *string        `json:"-" gorm:"type:char(32);column:access_token;uniqueIndex"` // this token is for system management
 	Quota            int            `json:"quota" gorm:"type:int;default:0"`
@@ -550,6 +552,8 @@ func (user *User) ClearBinding(bindingType string) error {
 		"oidc":     "oidc_id",
 		"wechat":   "wechat_id",
 		"telegram": "telegram_id",
+		"vk":       "vk_id",
+		"yandex":   "yandex_id",
 		"linuxdo":  "linux_do_id",
 	}
 
@@ -703,6 +707,28 @@ func IsOidcIdAlreadyTaken(oidcId string) bool {
 
 func IsTelegramIdAlreadyTaken(telegramId string) bool {
 	return DB.Unscoped().Where("telegram_id = ?", telegramId).Find(&User{}).RowsAffected == 1
+}
+
+func IsVkIdAlreadyTaken(vkId string) bool {
+	return DB.Unscoped().Where("vk_id = ?", vkId).Find(&User{}).RowsAffected == 1
+}
+
+func IsYandexIdAlreadyTaken(yandexId string) bool {
+	return DB.Unscoped().Where("yandex_id = ?", yandexId).Find(&User{}).RowsAffected == 1
+}
+
+func (user *User) FillUserByVkId() error {
+	if user.VkId == "" {
+		return errors.New("vk id is empty")
+	}
+	return DB.Where("vk_id = ?", user.VkId).First(user).Error
+}
+
+func (user *User) FillUserByYandexId() error {
+	if user.YandexId == "" {
+		return errors.New("yandex id is empty")
+	}
+	return DB.Where("yandex_id = ?", user.YandexId).First(user).Error
 }
 
 func ResetUserPasswordByEmail(email string, password string) error {

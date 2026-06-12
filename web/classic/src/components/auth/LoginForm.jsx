@@ -35,6 +35,8 @@ import {
   onDiscordOAuthClicked,
   onOIDCClicked,
   onLinuxDOOAuthClicked,
+  onVKOAuthClicked,
+  onYandexOAuthClicked,
   onCustomOAuthClicked,
   prepareCredentialRequestOptions,
   buildAssertionResult,
@@ -95,6 +97,8 @@ const LoginForm = () => {
   const [discordLoading, setDiscordLoading] = useState(false);
   const [oidcLoading, setOidcLoading] = useState(false);
   const [linuxdoLoading, setLinuxdoLoading] = useState(false);
+  const [vkLoading, setVkLoading] = useState(false);
+  const [yandexLoading, setYandexLoading] = useState(false);
   const [emailLoginLoading, setEmailLoginLoading] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [resetPasswordLoading, setResetPasswordLoading] = useState(false);
@@ -140,6 +144,8 @@ const LoginForm = () => {
       status.wechat_login ||
       status.linuxdo_oauth ||
       status.telegram_oauth ||
+      status.vk_oauth ||
+      status.yandex_oauth ||
       hasCustomOAuthProviders,
   );
 
@@ -387,6 +393,34 @@ const LoginForm = () => {
     }
   };
 
+  // VK 登录点击处理
+  const handleVKClick = () => {
+    if ((hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms) {
+      showInfo(t('请先阅读并同意用户协议和隐私政策'));
+      return;
+    }
+    setVkLoading(true);
+    try {
+      onVKOAuthClicked(status.vk_client_id, { shouldLogout: true });
+    } finally {
+      setTimeout(() => setVkLoading(false), 3000);
+    }
+  };
+
+  // Yandex 登录点击处理
+  const handleYandexClick = () => {
+    if ((hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms) {
+      showInfo(t('请先阅读并同意用户协议和隐私政策'));
+      return;
+    }
+    setYandexLoading(true);
+    try {
+      onYandexOAuthClicked(status.yandex_client_id, { shouldLogout: true });
+    } finally {
+      setTimeout(() => setYandexLoading(false), 3000);
+    }
+  };
+
   // 包装的自定义OAuth登录点击处理
   const handleCustomOAuthClick = (provider) => {
     if ((hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms) {
@@ -600,6 +634,41 @@ const LoginForm = () => {
                     loading={linuxdoLoading}
                   >
                     <span className='ml-3'>{t('使用 LinuxDO 继续')}</span>
+                  </Button>
+                )}
+
+                {status.vk_oauth && (
+                  <Button
+                    theme='outline'
+                    className='w-full h-12 flex items-center justify-center !rounded-full border border-gray-200 hover:bg-gray-50 transition-colors'
+                    type='tertiary'
+                    icon={
+                      <svg width='22' height='22' viewBox='0 0 24 24' fill='#0077FF'>
+                        <path d='M22.4 5.1c-.3-.7-.6-1.2-1.4-1.6-.5-.2-1-.3-2.1-.3h-4.1c-3.4 0-4.5 1.5-5.4 3.5-.6 1.4-1.1 2.8-2 4-.8 1-1.7 1.4-2.3 1.4-.5 0-.7-.1-.7-.4V8c0-1-.3-2.2-1-3-.4-.5-1-.8-2-.8h-1.1c-.8 0-1.2.1-1.4.5C.4 5.3 0 6.5 0 8.3v5.5c0 1.7.4 2.4.6 2.8.3.5 1.1 1 2.1 1 .7 0 1.1-.3 1.4-.9.8-1.5 2.1-3.8 3.2-5.1.8-.9 1.7-1.3 2.2-1.3.3 0 .5.1.5.4v3.3c0 .4 0 .8.2 1.1.3.6.8.8 1.8.8h3.4c.5 0 1.6.5 1.6-1.2 0-.9-.6-1.7-.8-2-.3-.4-.3-.7.1-1 .6-.5 1.2-1.1 1.8-1.9 1.2-1.7 2.1-3.7 2.1-4.7z'/>
+                      </svg>
+                    }
+                    onClick={handleVKClick}
+                    loading={vkLoading}
+                  >
+                    <span className='ml-3'>{t('使用 VK 继续')}</span>
+                  </Button>
+                )}
+
+                {status.yandex_oauth && (
+                  <Button
+                    theme='outline'
+                    className='w-full h-12 flex items-center justify-center !rounded-full border border-gray-200 hover:bg-gray-50 transition-colors'
+                    type='tertiary'
+                    icon={
+                      <svg width='22' height='22' viewBox='0 0 24 24' fill='#FC3F1D'>
+                        <circle cx='12' cy='12' r='11' fill='#FC3F1D'/>
+                        <text x='12' y='18' textAnchor='middle' fontSize='16' fontWeight='bold' fill='white' fontFamily='Arial'>Я</text>
+                      </svg>
+                    }
+                    onClick={handleYandexClick}
+                    loading={yandexLoading}
+                  >
+                    <span className='ml-3'>{t('使用 Yandex 继续')}</span>
                   </Button>
                 )}
 

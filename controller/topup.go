@@ -95,12 +95,36 @@ func GetTopUpInfo(c *gin.Context) {
 		}
 	}
 
+	// YooMoney payment (Russia)
+	enableYooMoney := isYooMoneyTopUpEnabled()
+	if enableYooMoney {
+		hasYooMoney := false
+		for _, method := range payMethods {
+			if method["type"] == model.PaymentMethodYoomoney {
+				hasYooMoney = true
+				break
+			}
+		}
+
+		if !hasYooMoney {
+			yoomoneyMethod := map[string]string{
+				"name":      "YooMoney",
+				"type":      model.PaymentMethodYoomoney,
+				"color":     "rgba(140, 60, 230, 1)",
+				"min_topup": strconv.Itoa(setting.YoomoneyMinTopUp),
+			}
+			payMethods = append(payMethods, yoomoneyMethod)
+		}
+	}
+
 	data := gin.H{
 		"enable_online_topup":              isEpayTopUpEnabled(),
 		"enable_stripe_topup":              isStripeTopUpEnabled(),
 		"enable_creem_topup":               isCreemTopUpEnabled(),
 		"enable_waffo_topup":               enableWaffo,
 		"enable_waffo_pancake_topup":       enableWaffoPancake,
+		"enable_yoomoney_topup":            enableYooMoney,
+		"yoomoney_min_topup":               setting.YoomoneyMinTopUp,
 		"enable_redemption":                complianceConfirmed,
 		"payment_compliance_confirmed":     complianceConfirmed,
 		"payment_compliance_terms_version": operation_setting.CurrentComplianceTermsVersion,

@@ -108,3 +108,14 @@ func isEpayWebhookConfigured() bool {
 func isEpayWebhookEnabled() bool {
 	return isEpayTopUpEnabled()
 }
+
+func isYooMoneyTopUpEnabled() bool {
+	if !isPaymentComplianceConfirmed() {
+		return false
+	}
+	return setting.IsYoomoneyEnabled()
+}
+
+func isYoomoneyWebhookEnabled() bool {
+	return isYooMoneyTopUpEnabled()
+}

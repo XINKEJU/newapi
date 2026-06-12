@@ -61,6 +61,8 @@ export function OAuthProviders({
     handleDiscordLogin,
     handleOIDCLogin,
     handleLinuxDOLogin,
+    handleVKLogin,
+    handleYandexLogin,
     handleTelegramLogin,
     handleCustomOAuthLogin,
   } = useOAuthLogin(status)
@@ -110,6 +112,33 @@ export function OAuthProviders({
       label: t('Continue with LinuxDO'),
       onClick: handleLinuxDOLogin,
       icon: <IconLinuxDo className='h-4 w-4' />,
+    })
+  }
+
+  if (status?.vk_oauth) {
+    providerButtons.push({
+      key: 'vk',
+      label: t('Continue with VK'),
+      onClick: handleVKLogin,
+      icon: (
+        <svg width='18' height='18' viewBox='0 0 24 24' fill='#0077FF'>
+          <path d='M22.4 5.1c-.3-.7-.6-1.2-1.4-1.6-.5-.2-1-.3-2.1-.3h-4.1c-3.4 0-4.5 1.5-5.4 3.5-.6 1.4-1.1 2.8-2 4-.8 1-1.7 1.4-2.3 1.4-.5 0-.7-.1-.7-.4V8c0-1-.3-2.2-1-3-.4-.5-1-.8-2-.8h-1.1c-.8 0-1.2.1-1.4.5C.4 5.3 0 6.5 0 8.3v5.5c0 1.7.4 2.4.6 2.8.3.5 1.1 1 2.1 1 .7 0 1.1-.3 1.4-.9.8-1.5 2.1-3.8 3.2-5.1.8-.9 1.7-1.3 2.2-1.3.3 0 .5.1.5.4v3.3c0 .4 0 .8.2 1.1.3.6.8.8 1.8.8h3.4c.5 0 1.6.5 1.6-1.2 0-.9-.6-1.7-.8-2-.3-.4-.3-.7.1-1 .6-.5 1.2-1.1 1.8-1.9 1.2-1.7 2.1-3.7 2.1-4.7z'/>
+        </svg>
+      ),
+    })
+  }
+
+  if (status?.yandex_oauth) {
+    providerButtons.push({
+      key: 'yandex',
+      label: t('Continue with Yandex'),
+      onClick: handleYandexLogin,
+      icon: (
+        <svg width='18' height='18' viewBox='0 0 24 24'>
+          <circle cx='12' cy='12' r='11' fill='#FC3F1D'/>
+          <text x='12' y='18' textAnchor='middle' fontSize='16' fontWeight='bold' fill='white' fontFamily='Arial'>Я</text>
+        </svg>
+      ),
     })
   }
 

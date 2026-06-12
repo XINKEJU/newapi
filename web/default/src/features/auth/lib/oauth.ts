@@ -23,6 +23,8 @@ export {
   buildDiscordOAuthUrl,
   buildOIDCOAuthUrl,
   buildLinuxDOOAuthUrl,
+  buildVKOAuthUrl,
+  buildYandexOAuthUrl,
 } from '@/lib/oauth'
 
 // ============================================================================
@@ -84,6 +86,24 @@ export function getAvailableOAuthProviders(
     })
   }
 
+  if (status.vk_oauth) {
+    providers.push({
+      name: 'VK',
+      type: 'vk',
+      enabled: true,
+      clientId: status.vk_client_id,
+    })
+  }
+
+  if (status.yandex_oauth) {
+    providers.push({
+      name: 'Yandex',
+      type: 'yandex',
+      enabled: true,
+      clientId: status.yandex_client_id,
+    })
+  }
+
   return providers
 }
 
@@ -98,6 +118,8 @@ export function hasOAuthProviders(status: SystemStatus | null): boolean {
     status.oidc_enabled ||
     status.linuxdo_oauth ||
     status.telegram_oauth ||
+    status.vk_oauth ||
+    status.yandex_oauth ||
     status.wechat_login
   )
 }

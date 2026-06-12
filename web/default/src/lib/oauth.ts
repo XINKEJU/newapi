@@ -69,6 +69,22 @@ export function buildLinuxDOOAuthUrl(clientId: string, state: string): string {
   return `https://connect.linux.do/oauth2/authorize?response_type=code&client_id=${clientId}&state=${state}`
 }
 
+/**
+ * Build VK (VKontakte) OAuth URL
+ */
+export function buildVKOAuthUrl(clientId: string, state: string): string {
+  const redirectUri = `${window.location.origin}/oauth/vk`
+  return `https://oauth.vk.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=email&v=5.131&state=${state}`
+}
+
+/**
+ * Build Yandex ID OAuth URL
+ */
+export function buildYandexOAuthUrl(clientId: string, state: string): string {
+  const redirectUri = `${window.location.origin}/oauth/yandex`
+  return `https://oauth.yandex.ru/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`
+}
+
 // ============================================================================
 // OAuth Helper Functions
 // ============================================================================

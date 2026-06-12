@@ -63,7 +63,7 @@ const createPricingSchema = (t: (key: string) => string) =>
       DisplayInCurrencyEnabled: z.boolean(),
       DisplayTokenStatEnabled: z.boolean(),
       general_setting: z.object({
-        quota_display_type: z.enum(['USD', 'CNY', 'TOKENS', 'CUSTOM']),
+        quota_display_type: z.enum(['USD', 'CNY', 'RUB', 'TOKENS', 'CUSTOM']),
         custom_currency_symbol: z.string().max(8).optional(),
         custom_currency_exchange_rate: z.coerce
           .number()
@@ -193,6 +193,7 @@ export function PricingSection({ defaultValues }: PricingSectionProps) {
                     items={[
                       { value: 'USD', label: t('USD') },
                       { value: 'CNY', label: t('CNY') },
+                      { value: 'RUB', label: t('RUB') },
                       { value: 'CUSTOM', label: t('Custom Currency') },
                       { value: 'TOKENS', label: t('Tokens Only') },
                     ]}
@@ -208,6 +209,7 @@ export function PricingSection({ defaultValues }: PricingSectionProps) {
                       <SelectGroup>
                         <SelectItem value='USD'>{t('USD')}</SelectItem>
                         <SelectItem value='CNY'>{t('CNY')}</SelectItem>
+                        <SelectItem value='RUB'>{t('RUB')}</SelectItem>
                         <SelectItem value='CUSTOM'>
                           {t('Custom Currency')}
                         </SelectItem>
@@ -236,9 +238,11 @@ export function PricingSection({ defaultValues }: PricingSectionProps) {
                     <FormLabel>
                       {displayType === 'CNY'
                         ? t('CNY per USD')
-                        : displayType === 'USD'
-                          ? t('USD Exchange Rate')
-                          : t('USD Exchange Rate')}
+                        : displayType === 'RUB'
+                          ? t('RUB per USD')
+                          : displayType === 'USD'
+                            ? t('USD Exchange Rate')
+                            : t('USD Exchange Rate')}
                     </FormLabel>
                     <FormControl>
                       <Input

@@ -315,6 +315,24 @@ export async function onLinuxDOOAuthClicked(
   );
 }
 
+export async function onVKOAuthClicked(vk_client_id, options = {}) {
+  const state = await prepareOAuthState(options);
+  if (!state) return;
+  const redirect_uri = `${window.location.origin}/oauth/vk`;
+  redirectToOAuthUrl(
+    `https://oauth.vk.com/authorize?client_id=${vk_client_id}&redirect_uri=${redirect_uri}&response_type=code&scope=email&v=5.131&state=${state}`,
+  );
+}
+
+export async function onYandexOAuthClicked(yandex_client_id, options = {}) {
+  const state = await prepareOAuthState(options);
+  if (!state) return;
+  const redirect_uri = `${window.location.origin}/oauth/yandex`;
+  redirectToOAuthUrl(
+    `https://oauth.yandex.ru/authorize?response_type=code&client_id=${yandex_client_id}&redirect_uri=${redirect_uri}&state=${state}`,
+  );
+}
+
 /**
  * Initiate custom OAuth login
  * @param {Object} provider - Custom OAuth provider config from status API

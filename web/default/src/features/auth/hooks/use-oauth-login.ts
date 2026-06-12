@@ -28,6 +28,8 @@ import {
   buildDiscordOAuthUrl,
   buildOIDCOAuthUrl,
   buildLinuxDOOAuthUrl,
+  buildVKOAuthUrl,
+  buildYandexOAuthUrl,
 } from '../lib/oauth'
 import type { SystemStatus, CustomOAuthProviderInfo } from '../types'
 
@@ -189,6 +191,48 @@ export function useOAuthLogin(status: SystemStatus | null) {
     toast.info(t('Telegram login requires widget integration; coming soon'))
   }
 
+  const handleVKLogin = async () => {
+    if (!status?.vk_client_id) return
+
+    setIsLoading(true)
+    try {
+      await resetSession()
+      const state = await getOAuthState()
+      if (!state) {
+        toast.error(t('Failed to initialize OAuth'))
+        return
+      }
+
+      const url = buildVKOAuthUrl(status.vk_client_id, state)
+      window.open(url, '_self')
+    } catch (_error) {
+      toast.error(t('Failed to start VK login'))
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleYandexLogin = async () => {
+    if (!status?.yandex_client_id) return
+
+    setIsLoading(true)
+    try {
+      await resetSession()
+      const state = await getOAuthState()
+      if (!state) {
+        toast.error(t('Failed to initialize OAuth'))
+        return
+      }
+
+      const url = buildYandexOAuthUrl(status.yandex_client_id, state)
+      window.open(url, '_self')
+    } catch (_error) {
+      toast.error(t('Failed to start Yandex login'))
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleCustomOAuthLogin = async (provider: CustomOAuthProviderInfo) => {
     if (!provider.authorization_endpoint || !provider.client_id) return
 
@@ -230,6 +274,8 @@ export function useOAuthLogin(status: SystemStatus | null) {
     handleOIDCLogin,
     handleLinuxDOLogin,
     handleTelegramLogin,
+    handleVKLogin,
+    handleYandexLogin,
     handleCustomOAuthLogin,
   }
 }
