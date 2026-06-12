@@ -17,6 +17,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { type TFunction } from 'i18next'
+import i18next from 'i18next'
+import dayjs from '@/lib/dayjs'
 import { formatTimestampToDate } from '@/lib/format'
 import { getNameRuleConfig, getQuotaTypeConfig } from '../constants'
 import type { NameRule, Model } from '../types'
@@ -34,24 +36,11 @@ export function formatTimestamp(timestamp: number): string {
 }
 
 /**
- * Format relative time
+ * Format relative time (locale-aware via dayjs)
  */
 export function formatRelativeTime(timestamp: number): string {
-  if (!timestamp || timestamp === 0) return 'Never'
-
-  const now = Date.now()
-  const time = timestamp * 1000
-  const diff = now - time
-
-  const seconds = Math.floor(diff / 1000)
-  const minutes = Math.floor(seconds / 60)
-  const hours = Math.floor(minutes / 60)
-  const days = Math.floor(hours / 24)
-
-  if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`
-  if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`
-  if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`
-  return `${seconds} second${seconds !== 1 ? 's' : ''} ago`
+  if (!timestamp || timestamp === 0) return i18next.t('Never')
+  return dayjs(timestamp * 1000).fromNow()
 }
 
 // ============================================================================

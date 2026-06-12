@@ -45,6 +45,8 @@ import (
 	"github.com/QuantumNous/new-api/relay/channel/volcengine"
 	"github.com/QuantumNous/new-api/relay/channel/xai"
 	"github.com/QuantumNous/new-api/relay/channel/xunfei"
+	"github.com/QuantumNous/new-api/relay/channel/gigachat"
+	"github.com/QuantumNous/new-api/relay/channel/yandexgpt"
 	"github.com/QuantumNous/new-api/relay/channel/zhipu"
 	"github.com/QuantumNous/new-api/relay/channel/zhipu_4v"
 	"github.com/gin-gonic/gin"
@@ -120,6 +122,10 @@ func GetAdaptor(apiType int) channel.Adaptor {
 		return &replicate.Adaptor{}
 	case constant.APITypeCodex:
 		return &codex.Adaptor{}
+	case constant.APITypeYandexGPT:
+		return &yandexgpt.Adaptor{}
+	case constant.APITypeGigaChat:
+		return &gigachat.Adaptor{}
 	}
 	return nil
 }

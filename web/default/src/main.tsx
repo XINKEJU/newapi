@@ -31,6 +31,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { getStatus } from '@/lib/api'
 import { installBuildMetadata } from '@/lib/build-metadata'
 import '@/lib/dayjs'
+import { setDayjsLocale } from '@/lib/dayjs'
 import { applyFaviconToDom } from '@/lib/dom-utils'
 import { initializeFrontendCache } from '@/lib/frontend-cache'
 import { handleServerError } from '@/lib/handle-server-error'
@@ -47,6 +48,10 @@ import './styles/index.css'
 // VChart theme is driven by our ThemeProvider (html.light/html.dark) via per-chart `theme` prop.
 initializeFrontendCache()
 installBuildMetadata()
+
+// Sync dayjs locale with i18next (initial + on language change)
+setDayjsLocale(i18next.language)
+i18next.on('languageChanged', setDayjsLocale)
 
 const queryClient = new QueryClient({
   defaultOptions: {

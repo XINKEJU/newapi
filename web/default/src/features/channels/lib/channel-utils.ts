@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { formatCurrencyFromUSD, formatQuotaWithCurrency } from '@/lib/currency'
 import dayjs from '@/lib/dayjs'
 import { formatTimestampToDate } from '@/lib/format'
+import i18next from 'i18next'
 import {
   CHANNEL_STATUS_CONFIG,
   CHANNEL_TYPES,
@@ -364,7 +365,7 @@ export function getResponseTimeConfig(timeMs: number) {
  * e.g., "2 hours ago", "3 days ago"
  */
 export function formatRelativeTime(timestamp: number): string {
-  if (!timestamp || timestamp === 0) return 'Never'
+  if (!timestamp || timestamp === 0) return i18next.t('Never')
 
   try {
     return dayjs(timestamp * 1000).fromNow()

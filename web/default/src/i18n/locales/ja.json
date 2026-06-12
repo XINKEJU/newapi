@@ -4538,6 +4538,24 @@
     "Zero retention": "データ保持なし",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V 4",
-    "Zoom": "ズーム"
+    "Zoom": "ズーム",
+    "API Key (optional)": "API キー（任意）",
+    "Configuration for YooMoney payment integration (Russia)": "YooMoney 支払い統合の設定（ロシア）",
+    "Currency code (RUB, USD, etc.)": "通貨コード（RUB、USD など）",
+    "Enable YooMoney": "YooMoney を有効にする",
+    "Enable YooMoney payment gateway": "YooMoney 支払いゲートウェイを有効にする",
+    "Enable test mode for YooMoney": "YooMoney のテストモードを有効にする",
+    "Enter API key": "API キーを入力",
+    "Enter notification secret": "通知シークレットを入力",
+    "Minimum recharge amount": "最低チャージ金額",
+    "Minimum top-up": "最低チャージ",
+    "Notification Secret": "通知シークレット",
+    "Notification signature:": "通知署名：",
+    "Secret for webhook signature verification": "Webhook 署名検証用シークレット",
+    "Wallet ID": "ウォレット ID",
+    "YooMoney API key (leave blank unless updating)": "YooMoney API キー（更新しない場合は空白）",
+    "YooMoney Gateway": "YooMoney ゲートウェイ",
+    "YooMoney wallet number (receiver)": "YooMoney ウォレット番号（受取人）",
+    "Your YooMoney wallet number": "YooMoney ウォレット番号"
   }
 }

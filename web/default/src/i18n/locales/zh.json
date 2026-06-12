@@ -4538,6 +4538,24 @@
     "Zero retention": "零数据保留",
     "Zhipu": "智谱",
     "Zhipu V4": "智谱 V4",
-    "Zoom": "缩放"
+    "Zoom": "缩放",
+    "API Key (optional)": "API 密钥（可选）",
+    "Configuration for YooMoney payment integration (Russia)": "配置 YooMoney 支付集成（俄罗斯）",
+    "Currency code (RUB, USD, etc.)": "货币代码（RUB、USD 等）",
+    "Enable YooMoney": "启用 YooMoney",
+    "Enable YooMoney payment gateway": "启用 YooMoney 支付网关",
+    "Enable test mode for YooMoney": "启用 YooMoney 测试模式",
+    "Enter API key": "输入 API 密钥",
+    "Enter notification secret": "输入通知密钥",
+    "Minimum recharge amount": "最低充值金额",
+    "Minimum top-up": "最低充值",
+    "Notification Secret": "通知密钥",
+    "Notification signature:": "通知签名：",
+    "Secret for webhook signature verification": "用于 Webhook 签名验证的密钥",
+    "Wallet ID": "钱包 ID",
+    "YooMoney API key (leave blank unless updating)": "YooMoney API 密钥（除非更新，否则留空）",
+    "YooMoney Gateway": "YooMoney 网关",
+    "YooMoney wallet number (receiver)": "YooMoney 钱包号码（收款方）",
+    "Your YooMoney wallet number": "您的 YooMoney 钱包号码"
   }
 }

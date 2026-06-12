@@ -501,11 +501,11 @@ export function PaymentSettingsSection({
         initialRef.current.WaffoPancakeReturnURL.trim()
       ),
       YoomoneyEnabled: initialRef.current.YoomoneyEnabled,
-      YoomoneyWalletId: initialRef.current.YoomoneyWalletId.trim(),
-      YoomoneyApiKey: initialRef.current.YoomoneyApiKey.trim(),
-      YoomoneyNotifySecret: initialRef.current.YoomoneyNotifySecret.trim(),
+      YoomoneyWalletId: (initialRef.current.YoomoneyWalletId ?? '').trim(),
+      YoomoneyApiKey: (initialRef.current.YoomoneyApiKey ?? '').trim(),
+      YoomoneyNotifySecret: (initialRef.current.YoomoneyNotifySecret ?? '').trim(),
       YoomoneyTestMode: initialRef.current.YoomoneyTestMode,
-      YoomoneyCurrency: initialRef.current.YoomoneyCurrency.trim() || 'RUB',
+      YoomoneyCurrency: (initialRef.current.YoomoneyCurrency ?? '').trim() || 'RUB',
       YoomoneyMinTopUp: initialRef.current.YoomoneyMinTopUp,
     }
 
@@ -1602,7 +1602,7 @@ export function PaymentSettingsSection({
                   </SettingsSwitchContent>
                   <FormControl>
                     <Switch
-                      checked={field.value}
+                      checked={field.value ?? false}
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
@@ -1716,7 +1716,7 @@ export function PaymentSettingsSection({
                     </SettingsSwitchContent>
                     <FormControl>
                       <Switch
-                        checked={field.value}
+                        checked={field.value ?? false}
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>

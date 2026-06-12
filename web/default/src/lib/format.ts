@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import dayjs from '@/lib/dayjs'
+import i18next from 'i18next'
 import {
   formatCurrencyFromUSD,
   formatQuotaWithCurrency,
@@ -114,17 +115,35 @@ export function quotaUnitsToDollars(units: number): number {
 // ============================================================================
 
 /**
- * Format Unix timestamp (seconds) to YYYY-MM-DD HH:mm:ss
+ * Returns the locale-appropriate date-time format string.
+ * Russian convention: DD.MM.YYYY HH:mm:ss
+ * All others default to YYYY-MM-DD HH:mm:ss
+ */
+function getDateTimeFormat(): string {
+  const lang = i18next.language ?? 'en'
+  return lang.startsWith('ru') ? 'DD.MM.YYYY HH:mm:ss' : 'YYYY-MM-DD HH:mm:ss'
+}
+
+/**
+ * Returns the locale-appropriate date-only format string.
+ */
+function getDateFormat(): string {
+  const lang = i18next.language ?? 'en'
+  return lang.startsWith('ru') ? 'DD.MM.YYYY' : 'YYYY-MM-DD'
+}
+
+/**
+ * Format Unix timestamp (seconds) to locale-appropriate date-time string.
  */
 export function formatTimestamp(timestamp: number): string {
   if (timestamp === -1) {
-    return 'Never'
+    return i18next.t('Never')
   }
   return formatTimestampToDate(timestamp)
 }
 
 /**
- * Format timestamp to YYYY-MM-DD HH:mm:ss
+ * Format timestamp to locale-appropriate date-time string.
  * @param timestamp - Timestamp in seconds or milliseconds
  * @param unit - Unit of the timestamp ('seconds' or 'milliseconds')
  */
@@ -136,17 +155,17 @@ export function formatTimestampToDate(
     return '-'
   }
   const ms = unit === 'seconds' ? timestamp * 1000 : timestamp
-  return dayjs(ms).format('YYYY-MM-DD HH:mm:ss')
+  return dayjs(ms).format(getDateTimeFormat())
 }
 
-/** Format a Date object to YYYY-MM-DD HH:mm:ss */
+/** Format a Date object to locale-appropriate date-time string */
 export function formatDateTimeStr(date: Date): string {
-  return dayjs(date).format('YYYY-MM-DD HH:mm:ss')
+  return dayjs(date).format(getDateTimeFormat())
 }
 
-/** Format a Date object to YYYY-MM-DD */
+/** Format a Date object to locale-appropriate date string */
 export function formatDateStr(date: Date): string {
-  return dayjs(date).format('YYYY-MM-DD')
+  return dayjs(date).format(getDateFormat())
 }
 
 /** Format a Date object to HH:mm:ss */

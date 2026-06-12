@@ -4538,6 +4538,24 @@
     "Zero retention": "Không lưu dữ liệu",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "API Key (optional)": "Khóa API (tùy chọn)",
+    "Configuration for YooMoney payment integration (Russia)": "Cấu hình tích hợp thanh toán YooMoney (Nga)",
+    "Currency code (RUB, USD, etc.)": "Mã tiền tệ (RUB, USD, v.v.)",
+    "Enable YooMoney": "Bật YooMoney",
+    "Enable YooMoney payment gateway": "Bật cổng thanh toán YooMoney",
+    "Enable test mode for YooMoney": "Bật chế độ kiểm tra cho YooMoney",
+    "Enter API key": "Nhập khóa API",
+    "Enter notification secret": "Nhập bí mật thông báo",
+    "Minimum recharge amount": "Số tiền nạp tối thiểu",
+    "Minimum top-up": "Nạp tối thiểu",
+    "Notification Secret": "Bí mật thông báo",
+    "Notification signature:": "Chữ ký thông báo:",
+    "Secret for webhook signature verification": "Bí mật xác minh chữ ký webhook",
+    "Wallet ID": "ID Ví",
+    "YooMoney API key (leave blank unless updating)": "Khóa API YooMoney (để trống nếu không cập nhật)",
+    "YooMoney Gateway": "Cổng YooMoney",
+    "YooMoney wallet number (receiver)": "Số ví YooMoney (người nhận)",
+    "Your YooMoney wallet number": "Số ví YooMoney của bạn"
   }
 }

@@ -4538,6 +4538,24 @@
     "Zero retention": "Zero retention",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "API Key (optional)": "API Key (optional)",
+    "Configuration for YooMoney payment integration (Russia)": "Configuration for YooMoney payment integration (Russia)",
+    "Currency code (RUB, USD, etc.)": "Currency code (RUB, USD, etc.)",
+    "Enable YooMoney": "Enable YooMoney",
+    "Enable YooMoney payment gateway": "Enable YooMoney payment gateway",
+    "Enable test mode for YooMoney": "Enable test mode for YooMoney",
+    "Enter API key": "Enter API key",
+    "Enter notification secret": "Enter notification secret",
+    "Minimum recharge amount": "Minimum recharge amount",
+    "Minimum top-up": "Minimum top-up",
+    "Notification Secret": "Notification Secret",
+    "Notification signature:": "Notification signature:",
+    "Secret for webhook signature verification": "Secret for webhook signature verification",
+    "Wallet ID": "Wallet ID",
+    "YooMoney API key (leave blank unless updating)": "YooMoney API key (leave blank unless updating)",
+    "YooMoney Gateway": "YooMoney Gateway",
+    "YooMoney wallet number (receiver)": "YooMoney wallet number (receiver)",
+    "Your YooMoney wallet number": "Your YooMoney wallet number"
   }
 }
