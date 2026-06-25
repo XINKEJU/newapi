@@ -292,7 +292,7 @@ function formatCurrencyValue(
   const adjustedValue = adjustForMinimum(value, digits, options.minimumNonZero)
 
   if (meta.kind === 'currency') {
-    const formatted = new Intl.NumberFormat(undefined, {
+    const formatted = new Intl.NumberFormat('ru-RU', {
       style: 'currency',
       currency: meta.currencyCode,
       currencyDisplay: 'narrowSymbol',
@@ -302,7 +302,7 @@ function formatCurrencyValue(
     return formatted
   }
 
-  const decimal = new Intl.NumberFormat(undefined, {
+  const decimal = new Intl.NumberFormat('ru-RU', {
     minimumFractionDigits: 0,
     maximumFractionDigits: digits,
   }).format(adjustedValue)

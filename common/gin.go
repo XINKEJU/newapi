@@ -225,6 +225,7 @@ func ApiErrorI18n(c *gin.Context, key string, args ...map[string]any) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": false,
 		"message": msg,
+		"key":     key,
 	})
 }
 

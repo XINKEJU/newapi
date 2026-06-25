@@ -17,6 +17,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/ru'
 import 'dayjs/locale/zh'
@@ -24,6 +26,8 @@ import 'dayjs/locale/fr'
 import 'dayjs/locale/ja'
 import 'dayjs/locale/vi'
 
+dayjs.extend(utc)
+dayjs.extend(timezone)
 dayjs.extend(relativeTime)
 
 /**
@@ -42,5 +46,8 @@ export function setDayjsLocale(lang: string): void {
   const locale = localeMap[lang] ?? 'en'
   dayjs.locale(locale)
 }
+
+// Default timezone for Russian market: Europe/Moscow (UTC+3)
+dayjs.tz.setDefault('Europe/Moscow')
 
 export default dayjs

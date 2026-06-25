@@ -38,8 +38,8 @@ func getEnvString(key string, defaultVal string) string {
 var (
 	YoomoneyEnabled     bool   = getEnvBool("YOOMONEY_ENABLED", true)       // Russia localized: default enabled
 	YoomoneyWalletId    string = getEnvString("YOOMONEY_WALLET_ID", "")    // YooMoney 钱包 ID（收款号）
-	YoomoneyApiKey      string = getEnvString("YOOMONEY_API_KEY", "")      // API 密钥（用于签名验证）
-	YoomoneyNotifySecret string = getEnvString("YOOMONEY_NOTIFY_SECRET", "") // 通知密钥（webhook 签名）
+	YoomoneyApiKey      string = getEnvString("YOOMONEY_API_KEY", "")      // 商店密码/API密钥（预留，当前未用于签名验证；webhook 验证使用 NotifySecret）
+	YoomoneyNotifySecret string = getEnvString("YOOMONEY_NOTIFY_SECRET", "") // 通知密钥（webhook SHA-1 签名验证用）
 	YoomoneyTestMode    bool   = getEnvBool("YOOMONEY_TEST_MODE", false)   // 沙箱/测试模式
 	YoomoneyCurrency    string = getEnvString("YOOMONEY_CURRENCY", "RUB")  // 货币：RUB / USD 等
 	YoomoneyMinTopUp    int    = getEnvInt("YOOMONEY_MIN_TOPUP", 50)       // 最小充值金额（RUB）

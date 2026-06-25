@@ -4,14 +4,14 @@
 
 # New API
 
-🍥 **API-шлюз нового поколения для больших языковых моделей и система управления AI-ресурсами**
+🍥 **Шлюз API для больших языковых моделей нового поколения и система управления AI-активами**
 
 <p align="center">
-  <a href="./README.md">中文</a> | 
-  <a href="./README.en.md">English</a> | 
-  <a href="./README.fr.md">Français</a> | 
-  <a href="./README.ja.md">日本語</a> | 
-  <strong>Русский</strong>
+  <a href="./README.md">中文</a> |
+  <a href="./README.en.md">English</a> |
+  <strong>Русский</strong> |
+  <a href="./README.fr.md">Français</a> |
+  <a href="./README.ja.md">日本語</a>
 </p>
 
 <p align="center">
@@ -33,7 +33,13 @@
 </p>
 
 <p align="center">
-  <a href="#-быстрый-старт">Быстрый старт</a> •
+  <a href="https://trendshift.io/repositories/8227" target="_blank">
+    <img src="https://trendshift.io/api/badge/repositories/8227" alt="Calcium-Ion%2Fnew-api | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/>
+  </a>
+</p>
+
+<p align="center">
+  <a href="#-быстрый-запуск">Быстрый запуск</a> •
   <a href="#-ключевые-возможности">Возможности</a> •
   <a href="#-развёртывание">Развёртывание</a> •
   <a href="#-документация">Документация</a> •
@@ -44,13 +50,13 @@
 
 ## 📝 Описание проекта
 
-> [!NOTE]  
-> Проект является open-source решением, разработанным на основе [One API](https://github.com/songquanpeng/one-api)
+> [!NOTE]
+> Это проект с открытым исходным кодом, основанный на [One API](https://github.com/songquanpeng/one-api)
 
-> [!IMPORTANT]  
-> - Проект предназначен исключительно для законных сценариев: API-шлюз, корпоративная аутентификация, управление несколькими моделями, аналитика использования, учёт затрат и частное развёртывание.
-> - Пользователи обязаны законно получить ключи API, учётные записи, модели и права на использование у провайдеров, а также соблюдать условия обслуживания провайдеров и применимые законы.
-> - При предоставлении генеративных AI-сервисов публично необходимо соблюдать все регуляторные требования юрисдикции.
+> [!IMPORTANT]
+> - Данный проект предназначен исключительно для законного и авторизованного использования в качестве AI API-шлюза, аутентификации на уровне организации, управления мультимоделями, аналитики использования, учёта затрат и частного развёртывания.
+> - Пользователи обязаны законно получать ключи API, учётные записи, доступ к моделям и интерфейсам от провайдеров и соблюдать условия обслуживания и применимое законодательство.
+> - При предоставлении генеративных AI-сервисов общественности пользователи должны соблюдать требования регулирующих органов, включая регистрацию, лицензирование, модерацию контента, верификацию пользователей, хранение логов, налогообложение и авторизацию провайдеров.
 
 ---
 
@@ -63,6 +69,9 @@
 <p align="center">
   <a href="https://www.cherry-ai.com/" target="_blank">
     <img src="./docs/images/cherry-studio.png" alt="Cherry Studio" height="80" />
+  </a>
+  <a href="https://bda.pku.edu.cn/" target="_blank">
+    <img src="./docs/images/pku.png" alt="Peking University" height="80" />
   </a>
   <a href="https://www.compshare.cn/?ytag=GPU_yy_gh_newapi" target="_blank">
     <img src="./docs/images/ucloud.png" alt="UCloud" height="80" />
@@ -77,16 +86,30 @@
 
 ---
 
-## 🚀 Быстрый старт
+## 🙏 Особая благодарность
 
-### Использование Docker Compose (рекомендуется)
+<p align="center">
+  <a href="https://www.jetbrains.com/?from=new-api" target="_blank">
+    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo" width="120" />
+  </a>
+</p>
+
+<p align="center">
+  <strong>Благодарим <a href="https://www.jetbrains.com/?from=new-api">JetBrains</a> за предоставление бесплатной лицензии для разработки open-source проекта</strong>
+</p>
+
+---
+
+## 🚀 Быстрый запуск
+
+### Docker Compose (рекомендуется)
 
 ```bash
 # Клонирование репозитория
 git clone https://github.com/QuantumNous/new-api.git
 cd new-api
 
-# Редактирование конфигурации
+# Настройка docker-compose.yml
 nano docker-compose.yml
 
 # Запуск сервиса
@@ -94,10 +117,10 @@ docker-compose up -d
 ```
 
 <details>
-<summary><strong>Использование команд Docker</strong></summary>
+<summary><strong>Запуск через Docker команды</strong></summary>
 
 ```bash
-# Скачать последний образ
+# Получение последнего образа
 docker pull calciumion/new-api:latest
 
 # Использование SQLite (по умолчанию)
@@ -116,16 +139,16 @@ docker run --name new-api -d --restart always \
   calciumion/new-api:latest
 ```
 
-> **💡 Подсказка:** `-v ./data:/data` сохраняет данные в папке `data` текущей директории. Можно также указать абсолютный путь: `-v /your/custom/path:/data`
+> **💡 Подсказка:** `-v ./data:/data` сохранит данные в папку `data` текущей директории. Можно указать абсолютный путь: `-v /your/custom/path:/data`
 
 </details>
 
 ---
 
-🎉 После развёртывания откройте `http://localhost:3000` и начните работу!
+🎉 После завершения развёртывания откройте `http://localhost:3000` для начала работы!
 
 > [!WARNING]
-> При использовании проекта в качестве публичного AI-сервиса или API-посредника необходимо выполнить все требования регулятора: регистрация, лицензирование, проверка личности, хранение журналов, уплата налогов и авторизация от провайдеров.
+> При эксплуатации данного проекта в качестве публичного сервиса генеративного AI или сервиса перепродажи API, пользователи должны предварительно выполнить все требования по регистрации, лицензированию, безопасности контента, верификации пользователей, хранению логов, налогам, платежам и авторизации провайдеров.
 
 📖 Подробнее о способах развёртывания: [Руководство по установке](https://docs.newapi.pro/en/docs/installation)
 
@@ -142,190 +165,180 @@ docker run --name new-api -d --restart always \
 **Быстрая навигация:**
 
 | Категория | Ссылка |
-|-----------|--------|
-| 🚀 Руководство по установке | [Документация по установке](https://docs.newapi.pro/en/docs/installation) |
-| ⚙️ Переменные окружения | [Переменные окружения](https://docs.newapi.pro/en/docs/installation/config-maintenance/environment-variables) |
+|------|------|
+| 🚀 Установка | [Документация по установке](https://docs.newapi.pro/en/docs/installation) |
+| ⚙️ Конфигурация | [Переменные окружения](https://docs.newapi.pro/en/docs/installation/config-maintenance/environment-variables) |
 | 📡 API | [Документация API](https://docs.newapi.pro/en/docs/api) |
 | ❓ FAQ | [Часто задаваемые вопросы](https://docs.newapi.pro/en/docs/support/faq) |
-| 💬 Сообщество | [Каналы общения](https://docs.newapi.pro/en/docs/support/community-interaction) |
+| 💬 Сообщество | [Каналы связи](https://docs.newapi.pro/en/docs/support/community-interaction) |
 
 ---
 
 ## ✨ Ключевые возможности
 
-> Подробное описание: [Введение в возможности](https://docs.newapi.pro/en/docs/guide/wiki/basic-concepts/features-introduction)
+> Подробнее: [Обзор функций](https://docs.newapi.pro/en/docs/guide/wiki/basic-concepts/features-introduction)
 
 ### 🎨 Основные функции
 
 | Функция | Описание |
-|---------|----------|
+|------|------|
 | 🎨 Новый интерфейс | Современный дизайн пользовательского интерфейса |
-| 🌍 Мультиязычность | Поддержка китайского, английского, французского, японского, **русского** |
-| 🔄 Совместимость данных | Полная совместимость с базой данных оригинального One API |
-| 📈 Дашборд данных | Визуальная консоль и статистический анализ |
-| 🔒 Управление доступом | Группировка токенов, ограничение моделей, управление пользователями |
+| 🌍 Мультиязычность | Поддержка русского, китайского, английского, французского, японского |
+| 🇷🇺 Локализация для РФ | Рубль (₽) по умолчанию, часовой пояс Europe/Moscow, провайдеры YandexGPT и GigaChat |
+| 💳 Платежи для РФ | YooMoney (ЮMoney), SberPay, Stripe |
+| 🔐 OAuth для РФ | Yandex ID, VK (ВКонтакте), GitHub, Discord, Telegram, LinuxDO, OIDC |
+| 🔄 Совместимость данных | Полная совместимость с базой данных One API |
+| 📈 Панель аналитики | Визуальная консоль и статистический анализ |
+| 🔒 Управление доступом | Группы токенов, ограничения моделей, управление пользователями |
 
-### 💰 Биллинг и учёт использования
+### 💰 Учёт и биллинг
 
-- ✅ Пополнение баланса и распределение квот (EPay, Stripe, YooMoney)
-- ✅ Учёт затрат на уровне запроса, использования и попадания в кеш
-- ✅ Статистика кеш-биллинга для OpenAI, Azure, DeepSeek, Claude, Qwen
-- ✅ Гибкие политики биллинга для внутреннего управления или корпоративных клиентов
+- ✅ Внутреннее пополнение и распределение квот (YooMoney, SberPay, Stripe, EPay)
+- ✅ Посессионный и модельный учёт затрат, кэширование
+- ✅ Статистика биллинга кэша для OpenAI, Azure, DeepSeek, Claude, Qwen и других
+- ✅ Гибкая биллинговая политика для внутреннего управления и корпоративных клиентов
 
 ### 🔐 Авторизация и безопасность
 
 - 😈 Авторизация через Discord
 - 🤖 Авторизация через LinuxDO
 - 📱 Авторизация через Telegram
-- 🔑 OIDC единая аутентификация
+- 🇷🇺 Авторизация через Yandex ID
+- 🇷🇺 Авторизация через VK (ВКонтакте)
+- 🔑 Единая аутентификация OIDC
 
-### 🤖 Поддерживаемые провайдеры (включая российские)
+### 🤖 Российские AI-провайдеры
 
-| Провайдер | Описание |
-|-----------|----------|
-| YandexGPT | Яндекс Foundation Models (`gpt://folder-id/yandexgpt/latest`) |
-| GigaChat (Sber) | GigaChat-Plus, GigaChat-Pro, GigaChat-Max |
-| OpenAI | GPT-4, GPT-4o, o1, o3 и др. |
-| Claude (Anthropic) | Claude 3.5, Claude 3 Opus и др. |
-| Gemini (Google) | Gemini 2.5 Pro/Flash и др. |
-| DeepSeek | deepseek-chat, deepseek-reasoner |
-| + 30 других провайдеров | Baidu, Ali, Zhipu, MiniMax, Mistral и др. |
+| Провайдер | Описание | Статус |
+|-----------|----------|--------|
+| 🇷🇺 YandexGPT | Нейросеть Яндекса (Yandex Cloud) | ✅ Поддерживается |
+| 🇷🇺 GigaChat | Нейросеть Сбера | ✅ Поддерживается |
 
-### 🚀 Расширенные возможности
+### 🚀 Продвинутые возможности
 
-**Поддерживаемые форматы API:**
-- ⚡ OpenAI Responses API
-- ⚡ OpenAI Realtime API (включая Azure)
-- ⚡ Claude Messages
-- ⚡ Google Gemini
-- 🔄 Rerank Models (Cohere, Jina)
+**Поддержка форматов API:**
+- ⚡ [OpenAI Responses](https://docs.newapi.pro/en/docs/api/ai-model/chat/openai/create-response)
+- ⚡ [OpenAI Realtime API](https://docs.newapi.pro/en/docs/api/ai-model/realtime/create-realtime-session) (включая Azure)
+- ⚡ [Claude Messages](https://docs.newapi.pro/en/docs/api/ai-model/chat/create-message)
+- ⚡ [Google Gemini](https://doc.newapi.pro/en/api/google-gemini-chat)
+- 🔄 [Rerank модели](https://docs.newapi.pro/en/docs/api/ai-model/rerank/create-rerank) (Cohere, Jina)
 
 **Интеллектуальная маршрутизация:**
-- ⚖️ Взвешенный случайный выбор канала
-- 🔄 Автоматические повторные попытки при сбоях
+- ⚖️ Взвешенная случайная маршрутизация каналов
+- 🔄 Автоматический повтор при сбое
 - 🚦 Ограничение частоты запросов на уровне пользователя
 
-**Преобразование форматов:**
-- 🔄 OpenAI ⇄ Claude Messages
-- 🔄 OpenAI → Google Gemini
-- 🔄 Google Gemini → OpenAI
+**Конвертация форматов:**
+- 🔄 **Совместимость с OpenAI ⇄ Claude Messages**
+- 🔄 **Совместимость с OpenAI → Google Gemini**
+- 🔄 **Google Gemini → Совместимость с OpenAI** — Только текст, вызов функций пока не поддерживается
+- 🚧 **Совместимость с OpenAI ⇄ OpenAI Responses** — В разработке
+
+---
+
+## 🤖 Поддержка моделей
+
+> Подробнее: [Документация API - Интерфейс шлюза](https://docs.newapi.pro/en/docs/api)
+
+| Тип модели | Описание | Документация |
+|---------|------|------|
+| 🤖 OpenAI GPTs | gpt-4-gizmo-* серия | - |
+| 🇷🇺 YandexGPT | Модели Yandex Cloud | - |
+| 🇷🇺 GigaChat | Модели Сбера | - |
+| 🎨 Midjourney-Proxy | [Midjourney-Proxy(Plus)](https://github.com/novicezk/midjourney-proxy) | [Документация](https://doc.newapi.pro/en/api/midjourney-proxy-image) |
+| 🎵 Suno-API | [Suno API](https://github.com/Suno-API/Suno-API) | [Документация](https://doc.newapi.pro/en/api/suno-music) |
+| 🔄 Rerank | Cohere, Jina | [Документация](https://docs.newapi.pro/en/docs/api/ai-model/rerank/create-rerank) |
+| 💬 Claude | Формат Messages | [Документация](https://docs.newapi.pro/en/docs/api/ai-model/chat/create-message) |
+| 🌐 Gemini | Формат Google Gemini | [Документация](https://doc.newapi.pro/en/api/google-gemini-chat) |
+| 🔧 Dify | Режим ChatFlow | - |
+| 🎯 Пользовательский | Поддержка настройки авторизованных эндпоинтов | - |
 
 ---
 
 ## 🚢 Развёртывание
 
 > [!TIP]
-> **Последний Docker-образ:** `calciumion/new-api:latest`
+> **Последний Docker образ:** `calciumion/new-api:latest`
 
-### 📋 Требования к развёртыванию
+### 📋 Требования
 
 | Компонент | Требование |
-|-----------|-----------|
-| **Локальная БД** | SQLite (Docker обязательно монтирует директорию `/data`) |
-| **Удалённая БД** | MySQL ≥ 5.7.8 или PostgreSQL ≥ 9.6 |
+|------|------|
+| **Локальная БД** | SQLite (Docker должен монтировать `/data`)|
+| **Внешняя БД** | MySQL ≥ 5.7.8 или PostgreSQL ≥ 9.6 |
 | **Контейнеризация** | Docker / Docker Compose |
 
-### ⚙️ Ключевые переменные окружения
+### ⚙️ Переменные окружения
 
 <details>
-<summary>Основные переменные конфигурации</summary>
+<summary>Основные переменные окружения</summary>
 
-| Переменная | Описание | Значение по умолчанию |
-|------------|----------|----------------------|
-| `SESSION_SECRET` | Секрет сессии (обязателен для мультисерверного развёртывания) | — |
-| `CRYPTO_SECRET` | Ключ шифрования (обязателен при использовании Redis) | — |
-| `SQL_DSN` | Строка подключения к БД | — |
-| `REDIS_CONN_STRING` | Строка подключения к Redis | — |
+| Переменная | Описание | По умолчанию |
+|--------|------|--------|
+| `SESSION_SECRET` | Секрет сессии (обязателен при многомашинном развёртывании) | - |
+| `CRYPTO_SECRET` | Секрет шифрования (обязателен при использовании Redis) | - |
+| `SQL_DSN` | Строка подключения к БД | - |
+| `REDIS_CONN_STRING` | Строка подключения к Redis | - |
 | `STREAMING_TIMEOUT` | Таймаут потоковой передачи (сек) | `300` |
-| `TZ` | Временная зона | — |
+| `STREAM_SCANNER_MAX_BUFFER_MB` | Макс. буфер строки (МБ) для потокового сканера | `64` |
+| `MAX_REQUEST_BODY_MB` | Макс. размер тела запроса (МБ, после декомпрессии) | `32` |
+| `ERROR_LOG_ENABLED` | Включение журнала ошибок | `false` |
+| `YANDEX_OAUTH_ENABLED` | Включить OAuth через Yandex ID | `false` |
+| `YANDEX_CLIENT_ID` | Yandex OAuth Client ID | - |
+| `YANDEX_CLIENT_SECRET` | Yandex OAuth Client Secret | - |
+| `VK_OAUTH_ENABLED` | Включить OAuth через VK | `false` |
+| `VK_CLIENT_ID` | VK OAuth Client ID | - |
+| `VK_CLIENT_SECRET` | VK OAuth Client Secret | - |
 
-📖 **Полный список:** [Документация по переменным окружения](https://docs.newapi.pro/en/docs/installation/config-maintenance/environment-variables)
-
-</details>
-
-### 🔧 Способы развёртывания
-
-<details>
-<summary><strong>Способ 1: Docker Compose (рекомендуется)</strong></summary>
-
-```bash
-git clone https://github.com/QuantumNous/new-api.git
-cd new-api
-nano docker-compose.yml
-docker-compose up -d
-```
+📖 **Полная конфигурация:** [Документация переменных окружения](https://docs.newapi.pro/en/docs/installation/config-maintenance/environment-variables)
 
 </details>
 
-<details>
-<summary><strong>Способ 2: Docker команды</strong></summary>
-
-**SQLite:**
-```bash
-docker run --name new-api -d --restart always \
-  -p 3000:3000 \
-  -e TZ=Europe/Moscow \
-  -v ./data:/data \
-  calciumion/new-api:latest
-```
-
-**MySQL:**
-```bash
-docker run --name new-api -d --restart always \
-  -p 3000:3000 \
-  -e SQL_DSN="root:password@tcp(localhost:3306)/oneapi" \
-  -e TZ=Europe/Moscow \
-  -v ./data:/data \
-  calciumion/new-api:latest
-```
-
-</details>
-
-### ⚠️ Особенности мультисерверного развёртывания
+### ⚠️ Особенности многомашинного развёртывания
 
 > [!WARNING]
-> - **Обязательно установите** `SESSION_SECRET` — иначе состояние входа будет несогласованным
-> - **При общем Redis установите** `CRYPTO_SECRET` — иначе данные не смогут быть расшифрованы
+> - **Обязательно задайте** `SESSION_SECRET` — иначе статус входа будет несогласованным
+> - **При использовании общего Redis задайте** `CRYPTO_SECRET` — иначе данные не расшифруются
 
 ---
 
 ## 🔗 Связанные проекты
 
-### Вышестоящие проекты
+### Исходные проекты
 
 | Проект | Описание |
-|--------|----------|
-| [One API](https://github.com/songquanpeng/one-api) | Оригинальный проект-основа |
-| [Midjourney-Proxy](https://github.com/novicezk/midjourney-proxy) | Поддержка интерфейса Midjourney |
+|------|------|
+| [One API](https://github.com/songquanpeng/one-api) | Основа проекта |
+| [Midjourney-Proxy](https://github.com/novicezk/midjourney-proxy) | Поддержка Midjourney |
 
-### Вспомогательные инструменты
+### Инструменты
 
 | Проект | Описание |
-|--------|----------|
-| [new-api-key-tool](https://github.com/Calcium-Ion/new-api-key-tool) | Инструмент запроса квоты ключей |
-| [new-api-horizon](https://github.com/Calcium-Ion/new-api-horizon) | Высокопроизводительная оптимизированная версия New API |
+|------|------|
+| [new-api-key-tool](https://github.com/Calcium-Ion/new-api-key-tool) | Инструмент проверки квоты ключей |
+| [new-api-horizon](https://github.com/Calcium-Ion/new-api-horizon) | Высокопроизводительная версия New API |
 
 ---
 
 ## 💬 Поддержка
 
-### 📖 Документация
+### 📖 Ресурсы документации
 
 | Ресурс | Ссылка |
-|--------|--------|
+|------|------|
 | 📘 FAQ | [Часто задаваемые вопросы](https://docs.newapi.pro/en/docs/support/faq) |
-| 💬 Сообщество | [Каналы общения](https://docs.newapi.pro/en/docs/support/community-interaction) |
-| 🐛 Отчёты об ошибках | [Обратная связь](https://docs.newapi.pro/en/docs/support/feedback-issues) |
+| 💬 Сообщество | [Каналы связи](https://docs.newapi.pro/en/docs/support/community-interaction) |
+| 🐛 Баг-репорты | [Сообщить о проблеме](https://docs.newapi.pro/en/docs/support/feedback-issues) |
 | 📚 Полная документация | [Официальная документация](https://docs.newapi.pro/en/docs) |
 
-### 🤝 Руководство по участию
+### 🤝 Участие в разработке
 
 Приветствуются любые формы участия!
 
 - 🐛 Сообщения об ошибках
-- 💡 Предложение новых функций
+- 💡 Предложения новых функций
 - 📝 Улучшение документации
-- 🔧 Отправка кода
+- 🔧 Pull request'ы с кодом
 
 ---
 
@@ -343,8 +356,10 @@ docker run --name new-api -d --restart always \
 
 ### 💖 Спасибо за использование New API
 
-Если проект оказался полезным, поставьте ⭐️ Star!
+Если этот проект оказался полезным, поставьте ⭐️ Star!
 
-**[Официальная документация](https://docs.newapi.pro/en/docs)** • **[Обратная связь](https://github.com/Calcium-Ion/new-api/issues)** • **[Последние релизы](https://github.com/Calcium-Ion/new-api/releases)**
+**[Официальная документация](https://docs.newapi.pro/en/docs)** • **[Баг-репорты](https://github.com/Calcium-Ion/new-api/issues)** • **[Релизы](https://github.com/Calcium-Ion/new-api/releases)**
+
+<sub>Создано с ❤️ командой QuantumNous</sub>
 
 </div>

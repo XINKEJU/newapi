@@ -204,16 +204,17 @@ function OAuthCallback() {
           safeNavigate('/sign-in')
           return
         }
-        const message = res?.data?.message || 'OAuth failed'
-        if (!res?.data?.success && !isBindingFlow) {
-          // When logging in with an already bound GitHub account, backend may return this message
-          if (message === '该 GitHub 账户已被绑定') {
-            if (await finalizeLogin()) {
-              redirectAfterLogin()
-              return
-            }
-          }
-        }
+		const message = res?.data?.message || 'OAuth failed'
+		const errorKey = res?.data?.key
+		if (!res?.data?.success && !isBindingFlow) {
+			// When logging in with an already bound account, backend returns oauth.already_bound key
+			if (errorKey === 'oauth.already_bound') {
+				if (await finalizeLogin()) {
+					redirectAfterLogin()
+					return
+				}
+			}
+		}
         if (isBindingFlow) {
           handleBindingFailure(message)
         } else {
