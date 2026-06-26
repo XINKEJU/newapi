@@ -196,3 +196,57 @@ func initConstantEnv() {
 	YandexClientId = GetEnvOrDefaultString("YANDEX_CLIENT_ID", "")
 	YandexClientSecret = GetEnvOrDefaultString("YANDEX_CLIENT_SECRET", "")
 }
+
+// InitOAuthFromEnv 用环境变量覆盖数据库配置（环境变量优先）
+// 在 loadOptionsFromDatabase 之后调用，防止数据库空值覆盖环境变量
+func InitOAuthFromEnv() {
+	if os.Getenv("GITHUB_OAUTH_ENABLED") != "" {
+		GitHubOAuthEnabled = GetEnvOrDefaultBool("GITHUB_OAUTH_ENABLED", GitHubOAuthEnabled)
+	}
+	if os.Getenv("GITHUB_CLIENT_ID") != "" {
+		GitHubClientId = os.Getenv("GITHUB_CLIENT_ID")
+	}
+	if os.Getenv("GITHUB_CLIENT_SECRET") != "" {
+		GitHubClientSecret = os.Getenv("GITHUB_CLIENT_SECRET")
+	}
+
+	if os.Getenv("TELEGRAM_OAUTH_ENABLED") != "" {
+		TelegramOAuthEnabled = GetEnvOrDefaultBool("TELEGRAM_OAUTH_ENABLED", TelegramOAuthEnabled)
+	}
+	if os.Getenv("TELEGRAM_BOT_TOKEN") != "" {
+		TelegramBotToken = os.Getenv("TELEGRAM_BOT_TOKEN")
+	}
+	if os.Getenv("TELEGRAM_BOT_NAME") != "" {
+		TelegramBotName = os.Getenv("TELEGRAM_BOT_NAME")
+	}
+
+	if os.Getenv("VK_OAUTH_ENABLED") != "" {
+		VKOAuthEnabled = GetEnvOrDefaultBool("VK_OAUTH_ENABLED", VKOAuthEnabled)
+	}
+	if os.Getenv("VK_CLIENT_ID") != "" {
+		VKClientId = os.Getenv("VK_CLIENT_ID")
+	}
+	if os.Getenv("VK_CLIENT_SECRET") != "" {
+		VKClientSecret = os.Getenv("VK_CLIENT_SECRET")
+	}
+
+	if os.Getenv("YANDEX_OAUTH_ENABLED") != "" {
+		YandexOAuthEnabled = GetEnvOrDefaultBool("YANDEX_OAUTH_ENABLED", YandexOAuthEnabled)
+	}
+	if os.Getenv("YANDEX_CLIENT_ID") != "" {
+		YandexClientId = os.Getenv("YANDEX_CLIENT_ID")
+	}
+	if os.Getenv("YANDEX_CLIENT_SECRET") != "" {
+		YandexClientSecret = os.Getenv("YANDEX_CLIENT_SECRET")
+	}
+
+	if os.Getenv("LINUXDO_OAUTH_ENABLED") != "" {
+		LinuxDOOAuthEnabled = GetEnvOrDefaultBool("LINUXDO_OAUTH_ENABLED", LinuxDOOAuthEnabled)
+	}
+	if os.Getenv("LINUXDO_CLIENT_ID") != "" {
+		LinuxDOClientId = os.Getenv("LINUXDO_CLIENT_ID")
+	}
+	if os.Getenv("LINUXDO_CLIENT_SECRET") != "" {
+		LinuxDOClientSecret = os.Getenv("LINUXDO_CLIENT_SECRET")
+	}
+}

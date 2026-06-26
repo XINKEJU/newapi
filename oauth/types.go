@@ -1,5 +1,43 @@
 package oauth
 
+import (
+	"fmt"
+
+	"github.com/QuantumNous/new-api/common"
+	"github.com/gin-gonic/gin"
+)
+
+// getRedirectURI derives the OAuth redirect_uri from the actual request,
+// ensuring it matches what the frontend sent during authorization.
+// This is critical: OAuth providers require the redirect_uri to be identical
+// in both the authorization and token-exchange steps.
+//
+// Priority: X-Forwarded-* headers (reverse proxy) → request scheme + host.
+// Falls back to ServerAddress from OptionMap if the request scheme cannot be determined.
+func getRedirectURI(c *gin.Context, provider string) string {
+	scheme := "https"
+	if proto := c.GetHeader("X-Forwarded-Proto"); proto != "" {
+		scheme = proto
+	} else if c.Request.TLS != nil {
+		scheme = "https"
+	} else {
+		scheme = "http"
+	}
+
+	host := c.GetHeader("X-Forwarded-Host")
+	if host == "" {
+		host = c.Request.Host
+	}
+
+	// If we have a usable host from the request, use it
+	if host != "" {
+		return fmt.Sprintf("%s://%s/oauth/%s", scheme, host, provider)
+	}
+
+	// Fallback to configured ServerAddress
+	return fmt.Sprintf("%s/oauth/%s", common.OptionMap["ServerAddress"], provider)
+}
+
 // OAuthToken represents the token received from OAuth provider
 type OAuthToken struct {
 	AccessToken  string         `json:"access_token"`

@@ -20,7 +20,7 @@ import { useState, useRef, useEffect } from 'react'
 import type { AxiosRequestConfig } from 'axios'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { useAuthStore } from '@/stores/auth-store'
+import { useAuthStore, type AuthUser } from '@/stores/auth-store'
 import { api } from '@/lib/api'
 import { getOAuthState } from '../api'
 import {
@@ -28,9 +28,9 @@ import {
   buildDiscordOAuthUrl,
   buildOIDCOAuthUrl,
   buildLinuxDOOAuthUrl,
-  buildVKOAuthUrl,
   buildYandexOAuthUrl,
 } from '../lib/oauth'
+import { loadVKIDSDK } from '../lib/vkid-sdk'
 import type { SystemStatus, CustomOAuthProviderInfo } from '../types'
 
 type LogoutRequestConfig = AxiosRequestConfig & {
@@ -45,6 +45,7 @@ export function useOAuthLogin(status: SystemStatus | null) {
   const [isLoading, setIsLoading] = useState(false)
   const [githubButtonText, setGithubButtonText] = useState('')
   const [githubButtonDisabled, setGithubButtonDisabled] = useState(false)
+  const [vkSDKReady, setVkSDKReady] = useState(false)
   const githubTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const { auth } = useAuthStore()
 
@@ -57,6 +58,25 @@ export function useOAuthLogin(status: SystemStatus | null) {
       }
     }
   }, [t])
+
+  // Pre-load VK ID SDK when VK OAuth is enabled
+  useEffect(() => {
+    if (!status?.vk_oauth || !status?.vk_client_id) return
+    loadVKIDSDK()
+      .then((sdk) => {
+        sdk.Config.init({
+          app: Number(status.vk_client_id),
+          redirectUrl: `${window.location.origin}/oauth/vk`,
+          responseMode: sdk.ConfigResponseMode.Callback,
+          source: sdk.ConfigSource.LOWCODE,
+          scope: 'email',
+        })
+        setVkSDKReady(true)
+      })
+      .catch(() => {
+        // SDK failed to load; handleVKLogin will show an error
+      })
+  }, [status?.vk_oauth, status?.vk_client_id])
 
   const resetSession = async () => {
     try {
@@ -192,19 +212,53 @@ export function useOAuthLogin(status: SystemStatus | null) {
   }
 
   const handleVKLogin = async () => {
-    if (!status?.vk_client_id) return
+    if (!status?.vk_client_id) {
+      toast.error(t('VK OAuth is not properly configured'))
+      return
+    }
+
+    if (!vkSDKReady || !window.VKIDSDK) {
+      toast.error(t('VK ID SDK is not loaded yet, please try again'))
+      return
+    }
 
     setIsLoading(true)
     try {
-      await resetSession()
-      const state = await getOAuthState()
-      if (!state) {
-        toast.error(t('Failed to initialize OAuth'))
-        return
-      }
+      const VKID = window.VKIDSDK
 
-      const url = buildVKOAuthUrl(status.vk_client_id, state)
-      window.open(url, '_self')
+      // Start login immediately (synchronous, user-initiated — avoids popup blocking)
+      const loginPromise = VKID.Auth.login()
+
+      // Reset session while the auth popup is open
+      await resetSession()
+
+      // Wait for the user to complete authentication
+      const payload = await loginPromise
+      const { code, device_id } = payload
+
+      // Exchange code for access token (client-side via SDK)
+      const tokenData = await VKID.Auth.exchangeCode(code, device_id)
+
+      // Send access token to backend for verification and session creation
+      const res = await api.post('/api/oauth/vk_sdk', {
+        access_token: tokenData.access_token,
+      })
+
+      if (res.data.success) {
+        const loginUser = res.data.data as AuthUser
+        useAuthStore.getState().auth.setUser(loginUser)
+        try {
+          if (typeof window !== 'undefined' && loginUser?.id != null) {
+            window.localStorage.setItem('uid', String(loginUser.id))
+          }
+        } catch {
+          // ignore storage errors
+        }
+        toast.success(t('Signed in successfully!'))
+        window.location.href = '/dashboard'
+      } else {
+        toast.error(res.data.message || t('Failed to start VK login'))
+      }
     } catch (_error) {
       toast.error(t('Failed to start VK login'))
     } finally {
@@ -213,7 +267,10 @@ export function useOAuthLogin(status: SystemStatus | null) {
   }
 
   const handleYandexLogin = async () => {
-    if (!status?.yandex_client_id) return
+    if (!status?.yandex_client_id) {
+      toast.error(t('Yandex OAuth is not properly configured'))
+      return
+    }
 
     setIsLoading(true)
     try {

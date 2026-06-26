@@ -127,6 +127,99 @@ func HandleOAuth(c *gin.Context) {
 	setupLogin(user, c)
 }
 
+// HandleVKSDKLogin handles VK ID SDK login flow.
+// The frontend exchanges the authorization code via VKID.Auth.exchangeCode()
+// and sends the resulting access_token to this endpoint for verification.
+// The backend verifies the token by calling VK ID's user_info API.
+func HandleVKSDKLogin(c *gin.Context) {
+	var req struct {
+		AccessToken string `json:"access_token"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		common.ApiError(c, err)
+		return
+	}
+	if req.AccessToken == "" {
+		common.ApiErrorI18n(c, i18n.MsgOAuthInvalidCode, providerParams("VK"))
+		return
+	}
+
+	provider := oauth.GetProvider("vk")
+	if provider == nil {
+		common.ApiErrorI18n(c, i18n.MsgOAuthUnknownProvider)
+		return
+	}
+
+	if !provider.IsEnabled() {
+		common.ApiErrorI18n(c, i18n.MsgOAuthNotEnabled, providerParams(provider.GetName()))
+		return
+	}
+
+	vkProvider, ok := provider.(*oauth.VKProvider)
+	if !ok {
+		common.ApiError(c, fmt.Errorf("invalid VK provider type"))
+		return
+	}
+
+	// Verify the access token and get user info from VK ID API
+	oauthUser, err := vkProvider.GetUserInfoFromAccessToken(c.Request.Context(), req.AccessToken)
+	if err != nil {
+		handleOAuthError(c, err)
+		return
+	}
+
+	session := sessions.Default(c)
+
+	// Check if user is already logged in (bind flow)
+	username := session.Get("username")
+	if username != nil {
+		if provider.IsUserIDTaken(oauthUser.ProviderUserID) {
+			common.ApiErrorI18n(c, i18n.MsgOAuthAlreadyBound, providerParams(provider.GetName()))
+			return
+		}
+		id := session.Get("id")
+		user := model.User{Id: id.(int)}
+		err = user.FillUserById()
+		if err != nil {
+			common.ApiError(c, err)
+			return
+		}
+		provider.SetProviderUserID(&user, oauthUser.ProviderUserID)
+		err = user.Update(false)
+		if err != nil {
+			common.ApiError(c, err)
+			return
+		}
+		common.ApiSuccessI18n(c, i18n.MsgOAuthBindSuccess, gin.H{
+			"action": "bind",
+		})
+		return
+	}
+
+	// Find or create user
+	user, err := findOrCreateOAuthUser(c, provider, oauthUser, session)
+	if err != nil {
+		switch err.(type) {
+		case *OAuthUserDeletedError:
+			common.ApiErrorI18n(c, i18n.MsgOAuthUserDeleted)
+		case *OAuthRegistrationDisabledError:
+			common.ApiErrorI18n(c, i18n.MsgUserRegisterDisabled)
+		default:
+			common.ApiError(c, err)
+		}
+		return
+	}
+
+	// Check user status
+	if user.Status != common.UserStatusEnabled {
+		common.ApiErrorI18n(c, i18n.MsgOAuthUserBanned)
+		return
+	}
+
+	// Setup login
+	setupLogin(user, c)
+}
+
 // handleOAuthBind handles binding OAuth account to existing user
 func handleOAuthBind(c *gin.Context, provider oauth.Provider) {
 	if !provider.IsEnabled() {
@@ -313,6 +406,8 @@ func findOrCreateOAuthUser(c *gin.Context, provider oauth.Provider, oauthUser *o
 				"linux_do_id": user.LinuxDOId,
 				"wechat_id":   user.WeChatId,
 				"telegram_id": user.TelegramId,
+				"vk_id":       user.VkId,
+				"yandex_id":   user.YandexId,
 			}).Error; err != nil {
 				return err
 			}

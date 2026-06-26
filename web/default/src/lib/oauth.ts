@@ -73,16 +73,26 @@ export function buildLinuxDOOAuthUrl(clientId: string, state: string): string {
  * Build VK (VKontakte) OAuth URL
  */
 export function buildVKOAuthUrl(clientId: string, state: string): string {
-  const redirectUri = `${window.location.origin}/oauth/vk`
-  return `https://oauth.vk.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=email&v=5.131&state=${state}`
+  const url = new URL('https://oauth.vk.com/authorize')
+  url.searchParams.set('client_id', clientId)
+  url.searchParams.set('redirect_uri', `${window.location.origin}/oauth/vk`)
+  url.searchParams.set('response_type', 'code')
+  url.searchParams.set('scope', 'email')
+  url.searchParams.set('v', '5.131')
+  url.searchParams.set('state', state)
+  return url.toString()
 }
 
 /**
  * Build Yandex ID OAuth URL
  */
 export function buildYandexOAuthUrl(clientId: string, state: string): string {
-  const redirectUri = `${window.location.origin}/oauth/yandex`
-  return `https://oauth.yandex.ru/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`
+  const url = new URL('https://oauth.yandex.ru/authorize')
+  url.searchParams.set('response_type', 'code')
+  url.searchParams.set('client_id', clientId)
+  url.searchParams.set('redirect_uri', `${window.location.origin}/oauth/yandex`)
+  url.searchParams.set('state', state)
+  return url.toString()
 }
 
 // ============================================================================

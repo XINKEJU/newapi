@@ -4369,6 +4369,8 @@
     "Video length in seconds": "Длительность видео в секундах",
     "Video Remix": "Ремикс видео",
     "Vidu": "Vidu",
+    "VK OAuth is not properly configured": "VK OAuth настроен неправильно",
+    "VK ID SDK is not loaded yet, please try again": "VK ID SDK ещё не загружен, попробуйте снова",
     "View": "Просмотр",
     "View all currently available models": "Просмотреть все доступные модели",
     "View detailed information about this user including balance, usage statistics, and invitation details.": "Просмотр подробной информации об этом пользователе, включая баланс, статистику использования и данные приглашения.",

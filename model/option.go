@@ -202,6 +202,7 @@ func InitOptionMap() {
 	loadOptionsFromDatabase()
 	// 环境变量覆盖数据库配置（环境变量优先）
 	setting.InitYoomoneyFromEnv()
+	common.InitOAuthFromEnv()
 }
 
 func loadOptionsFromDatabase() {
@@ -221,6 +222,7 @@ func SyncOptions(frequency int) {
 		loadOptionsFromDatabase()
 		// 环境变量覆盖数据库配置（环境变量优先）
 		setting.InitYoomoneyFromEnv()
+		common.InitOAuthFromEnv()
 	}
 }
 

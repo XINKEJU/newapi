@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/QuantumNous/new-api/common"
@@ -60,7 +62,7 @@ func (p *VKProvider) ExchangeToken(ctx context.Context, code string, c *gin.Cont
 
 	logger.LogDebug(ctx, "[OAuth-VK] ExchangeToken: code=%s...", code[:min(len(code), 10)])
 
-	redirectUri := fmt.Sprintf("%s/oauth/vk", common.OptionMap["ServerAddress"])
+	redirectUri := getRedirectURI(c, "vk")
 	url := fmt.Sprintf(
 		"https://oauth.vk.com/access_token?client_id=%s&client_secret=%s&redirect_uri=%s&code=%s",
 		common.VKClientId, common.VKClientSecret, redirectUri, code,
@@ -187,6 +189,84 @@ func (p *VKProvider) GetUserInfo(ctx context.Context, token *OAuthToken) (*OAuth
 		Email:          userEmail,
 		Extra: map[string]any{
 			"photo_url": vkUser.Photo100,
+		},
+	}, nil
+}
+
+// vkIDUserInfoResponse is the response from VK ID's user_info endpoint (id.vk.ru)
+type vkIDUserInfoResponse struct {
+	User vkIDUser `json:"user"`
+}
+
+type vkIDUser struct {
+	UserID    string `json:"user_id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Avatar    string `json:"avatar"`
+}
+
+// GetUserInfoFromAccessToken verifies an access token obtained from the VK ID SDK
+// and returns user info. The frontend exchanges the authorization code via
+// VKID.Auth.exchangeCode() and sends the resulting access_token to the backend.
+// The backend verifies the token by calling https://id.vk.ru/oauth2/user_info.
+func (p *VKProvider) GetUserInfoFromAccessToken(ctx context.Context, accessToken string) (*OAuthUser, error) {
+	logger.LogDebug(ctx, "[OAuth-VK] GetUserInfoFromAccessToken: verifying token via VK ID API")
+
+	formData := url.Values{
+		"client_id":    {common.VKClientId},
+		"access_token": {accessToken},
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", "https://id.vk.ru/oauth2/user_info", strings.NewReader(formData.Encode()))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	client := http.Client{Timeout: 20 * time.Second}
+	res, err := client.Do(req)
+	if err != nil {
+		logger.LogError(ctx, fmt.Sprintf("[OAuth-VK] GetUserInfoFromAccessToken error: %s", err.Error()))
+		return nil, NewOAuthErrorWithRaw(i18n.MsgOAuthConnectFailed, map[string]any{"Provider": "VK"}, err.Error())
+	}
+	defer res.Body.Close()
+
+	logger.LogDebug(ctx, "[OAuth-VK] GetUserInfoFromAccessToken response status: %d", res.StatusCode)
+
+	if res.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(res.Body)
+		bodyStr := string(body)
+		if len(bodyStr) > 500 {
+			bodyStr = bodyStr[:500] + "..."
+		}
+		logger.LogError(ctx, fmt.Sprintf("[OAuth-VK] GetUserInfoFromAccessToken failed: status=%d, body=%s", res.StatusCode, bodyStr))
+		return nil, NewOAuthErrorWithRaw(i18n.MsgOAuthGetUserErr, map[string]any{"Provider": "VK"}, fmt.Sprintf("status %d", res.StatusCode))
+	}
+
+	var userInfoResp vkIDUserInfoResponse
+	if err := common.DecodeJson(res.Body, &userInfoResp); err != nil {
+		logger.LogError(ctx, fmt.Sprintf("[OAuth-VK] GetUserInfoFromAccessToken decode error: %s", err.Error()))
+		return nil, err
+	}
+
+	if userInfoResp.User.UserID == "" {
+		logger.LogError(ctx, "[OAuth-VK] GetUserInfoFromAccessToken failed: empty user id")
+		return nil, NewOAuthError(i18n.MsgOAuthUserInfoEmpty, map[string]any{"Provider": "VK"})
+	}
+
+	displayName := strings.TrimSpace(userInfoResp.User.FirstName + " " + userInfoResp.User.LastName)
+
+	logger.LogDebug(ctx, "[OAuth-VK] GetUserInfoFromAccessToken success: id=%s, name=%s, email=%s",
+		userInfoResp.User.UserID, displayName, userInfoResp.User.Email)
+
+	return &OAuthUser{
+		ProviderUserID: userInfoResp.User.UserID,
+		Username:       "vk_" + userInfoResp.User.UserID,
+		DisplayName:    displayName,
+		Email:          userInfoResp.User.Email,
+		Extra: map[string]any{
+			"photo_url": userInfoResp.User.Avatar,
 		},
 	}, nil
 }

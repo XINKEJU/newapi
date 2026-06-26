@@ -64,7 +64,7 @@ func (p *YandexProvider) ExchangeToken(ctx context.Context, code string, c *gin.
 
 	logger.LogDebug(ctx, "[OAuth-Yandex] ExchangeToken: code=%s...", code[:min(len(code), 10)])
 
-	redirectUri := fmt.Sprintf("%s/oauth/yandex", common.OptionMap["ServerAddress"])
+	redirectUri := getRedirectURI(c, "yandex")
 	values := url.Values{}
 	values.Set("grant_type", "authorization_code")
 	values.Set("code", code)
