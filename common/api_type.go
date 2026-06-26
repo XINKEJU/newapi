@@ -79,6 +79,8 @@ func ChannelType2APIType(channelType int) (int, bool) {
 		apiType = constant.APITypeYandexGPT
 	case constant.ChannelTypeGigaChat:
 		apiType = constant.APITypeGigaChat
+	case constant.ChannelTypeAdvancedCustom:
+		apiType = constant.APITypeAdvancedCustom
 	}
 	if apiType == -1 {
 		return constant.APITypeOpenAI, false

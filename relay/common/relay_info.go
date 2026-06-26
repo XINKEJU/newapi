@@ -318,26 +318,27 @@ func (info *RelayInfo) ToString() string {
 
 // 定义支持流式选项的通道类型
 var streamSupportedChannels = map[int]bool{
-	constant.ChannelTypeOpenAI:      true,
-	constant.ChannelTypeAnthropic:   true,
-	constant.ChannelTypeAws:         true,
-	constant.ChannelTypeGemini:      true,
-	constant.ChannelCloudflare:      true,
-	constant.ChannelTypeAzure:       true,
-	constant.ChannelTypeVolcEngine:  true,
-	constant.ChannelTypeOllama:      true,
-	constant.ChannelTypeXai:         true,
-	constant.ChannelTypeDeepSeek:    true,
-	constant.ChannelTypeBaiduV2:     true,
-	constant.ChannelTypeZhipu_v4:    true,
-	constant.ChannelTypeAli:         true,
-	constant.ChannelTypeSubmodel:    true,
-	constant.ChannelTypeCodex:       true,
-	constant.ChannelTypeMoonshot:    true,
-	constant.ChannelTypeMiniMax:     true,
-	constant.ChannelTypeSiliconFlow: true,
-	constant.ChannelTypeYandexGPT:   true,
-	constant.ChannelTypeGigaChat:    true,
+	constant.ChannelTypeOpenAI:         true,
+	constant.ChannelTypeAnthropic:      true,
+	constant.ChannelTypeAws:            true,
+	constant.ChannelTypeGemini:         true,
+	constant.ChannelCloudflare:         true,
+	constant.ChannelTypeAzure:          true,
+	constant.ChannelTypeVolcEngine:     true,
+	constant.ChannelTypeOllama:         true,
+	constant.ChannelTypeXai:            true,
+	constant.ChannelTypeDeepSeek:       true,
+	constant.ChannelTypeBaiduV2:        true,
+	constant.ChannelTypeZhipu_v4:       true,
+	constant.ChannelTypeAli:            true,
+	constant.ChannelTypeSubmodel:       true,
+	constant.ChannelTypeCodex:          true,
+	constant.ChannelTypeMoonshot:       true,
+	constant.ChannelTypeMiniMax:        true,
+	constant.ChannelTypeSiliconFlow:    true,
+	constant.ChannelTypeYandexGPT:      true,
+	constant.ChannelTypeGigaChat:       true,
+	constant.ChannelTypeAdvancedCustom: true,
 }
 
 func GenRelayInfoWs(c *gin.Context, ws *websocket.Conn) *RelayInfo {
@@ -460,7 +461,7 @@ func genBaseRelayInfo(c *gin.Context, request dto.Request) *RelayInfo {
 
 	reqId := common.GetContextKeyString(c, common.RequestIdKey)
 	if reqId == "" {
-		reqId = common.GetTimeString() + common.GetRandomString(8)
+		reqId = common.NewRequestId()
 	}
 	info := &RelayInfo{
 		Request: request,

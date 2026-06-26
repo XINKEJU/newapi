@@ -17,7 +17,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import dayjs from '@/lib/dayjs'
-import i18next from 'i18next'
 import {
   formatCurrencyFromUSD,
   formatQuotaWithCurrency,
@@ -28,16 +27,22 @@ import {
 // Number Formatting
 // ============================================================================
 
-export function formatNumber(value: number | null | undefined): string {
+export function formatNumber(
+  value: number | null | undefined,
+  locales?: Intl.LocalesArgument
+): string {
   if (value == null || Number.isNaN(value as number)) return '-'
-  return Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(
+  return Intl.NumberFormat(locales, { maximumFractionDigits: 2 }).format(
     value as number
   )
 }
 
-export function formatCompactNumber(value: number | null | undefined): string {
+export function formatCompactNumber(
+  value: number | null | undefined,
+  locales?: Intl.LocalesArgument
+): string {
   if (value == null || Number.isNaN(value as number)) return '-'
-  return Intl.NumberFormat(undefined, {
+  return Intl.NumberFormat(locales, {
     notation: 'compact',
     maximumFractionDigits: 1,
   }).format(value as number)
@@ -115,35 +120,17 @@ export function quotaUnitsToDollars(units: number): number {
 // ============================================================================
 
 /**
- * Returns the locale-appropriate date-time format string.
- * Russian convention: DD.MM.YYYY HH:mm:ss
- * All others default to YYYY-MM-DD HH:mm:ss
- */
-function getDateTimeFormat(): string {
-  const lang = i18next.language ?? 'en'
-  return lang.startsWith('ru') ? 'DD.MM.YYYY HH:mm:ss' : 'YYYY-MM-DD HH:mm:ss'
-}
-
-/**
- * Returns the locale-appropriate date-only format string.
- */
-function getDateFormat(): string {
-  const lang = i18next.language ?? 'en'
-  return lang.startsWith('ru') ? 'DD.MM.YYYY' : 'YYYY-MM-DD'
-}
-
-/**
- * Format Unix timestamp (seconds) to locale-appropriate date-time string.
+ * Format Unix timestamp (seconds) to YYYY-MM-DD HH:mm:ss
  */
 export function formatTimestamp(timestamp: number): string {
   if (timestamp === -1) {
-    return i18next.t('Never')
+    return 'Never'
   }
   return formatTimestampToDate(timestamp)
 }
 
 /**
- * Format timestamp to locale-appropriate date-time string.
+ * Format timestamp to YYYY-MM-DD HH:mm:ss
  * @param timestamp - Timestamp in seconds or milliseconds
  * @param unit - Unit of the timestamp ('seconds' or 'milliseconds')
  */
@@ -155,17 +142,57 @@ export function formatTimestampToDate(
     return '-'
   }
   const ms = unit === 'seconds' ? timestamp * 1000 : timestamp
-  return dayjs(ms).format(getDateTimeFormat())
+  return dayjs(ms).format('YYYY-MM-DD HH:mm:ss')
 }
 
-/** Format a Date object to locale-appropriate date-time string */
+/**
+ * Format timestamp as relative time, e.g. "30 seconds ago".
+ * @param timestamp - Timestamp in seconds or milliseconds
+ * @param unit - Unit of the timestamp ('seconds' or 'milliseconds')
+ * @param locales - Locale passed to Intl.RelativeTimeFormat
+ */
+export function formatTimestampRelative(
+  timestamp?: number,
+  unit: 'seconds' | 'milliseconds' = 'seconds',
+  locales?: Intl.LocalesArgument
+): string {
+  if (!timestamp || timestamp === -1 || timestamp === 0) {
+    return '-'
+  }
+
+  const ms = unit === 'seconds' ? timestamp * 1000 : timestamp
+  const diffSeconds = Math.round((ms - Date.now()) / 1000)
+  const absSeconds = Math.abs(diffSeconds)
+  const formatter = new Intl.RelativeTimeFormat(locales, {
+    numeric: 'always',
+  })
+
+  if (absSeconds < 60) {
+    return formatter.format(diffSeconds, 'second')
+  }
+  if (absSeconds < 3600) {
+    return formatter.format(Math.round(diffSeconds / 60), 'minute')
+  }
+  if (absSeconds < 86400) {
+    return formatter.format(Math.round(diffSeconds / 3600), 'hour')
+  }
+  if (absSeconds < 2592000) {
+    return formatter.format(Math.round(diffSeconds / 86400), 'day')
+  }
+  if (absSeconds < 31536000) {
+    return formatter.format(Math.round(diffSeconds / 2592000), 'month')
+  }
+  return formatter.format(Math.round(diffSeconds / 31536000), 'year')
+}
+
+/** Format a Date object to YYYY-MM-DD HH:mm:ss */
 export function formatDateTimeStr(date: Date): string {
-  return dayjs(date).format(getDateTimeFormat())
+  return dayjs(date).format('YYYY-MM-DD HH:mm:ss')
 }
 
-/** Format a Date object to locale-appropriate date string */
+/** Format a Date object to YYYY-MM-DD */
 export function formatDateStr(date: Date): string {
-  return dayjs(date).format(getDateFormat())
+  return dayjs(date).format('YYYY-MM-DD')
 }
 
 /** Format a Date object to HH:mm:ss */
