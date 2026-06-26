@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/setting"
@@ -143,9 +142,4 @@ func CreateYooMoneyTopUpOrder(tradeNo string, amount float64, returnURL string) 
 
 	payURL = BuildYooMoneyQuickPayURL(p)
 	return payURL, nil
-}
-
-func init() {
-	// 注册 YooMoney 配置热更新监听（如有需要可在此添加）
-	_ = time.Now() // 占位，避免空 init 编译错误
 }

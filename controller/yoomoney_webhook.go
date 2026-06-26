@@ -48,6 +48,13 @@ func YooMoneyNotify(c *gin.Context) {
 		return
 	}
 
+	// 如果 payment 未完成（unaccepted=true），不处理
+	if params["unaccepted"] == "true" {
+		common.SysLog(fmt.Sprintf("YooMoney notify: payment unaccepted, label=%s", params["label"]))
+		c.String(http.StatusOK, "success")
+		return
+	}
+
 	// 验证签名
 	notificationSecret := setting.YoomoneyNotifySecret
 	if notificationSecret == "" {

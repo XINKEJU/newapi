@@ -295,6 +295,13 @@ const (
 	MsgOAuthTrustLevelLow   = "oauth.trust_level_low"
 )
 
+// Email related messages
+const (
+	MsgEmailVerificationSubject = "email.verification_subject"
+	MsgEmailPasswordResetSubject = "email.password_reset_subject"
+	MsgEmailTestSubject          = "email.test_subject"
+)
+
 // Model layer error messages (for translation in controller)
 const (
 	MsgRedeemFailed          = "redeem.failed"

@@ -54,4 +54,9 @@ i18n
     },
   })
 
+// Default to Russian for first-time visitors (no saved language preference)
+if (!localStorage.getItem('i18nextLng')) {
+  i18n.changeLanguage('ru')
+}
+
 export default i18n
