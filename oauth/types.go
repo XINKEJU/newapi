@@ -31,11 +31,11 @@ func getRedirectURI(c *gin.Context, provider string) string {
 
 	// If we have a usable host from the request, use it
 	if host != "" {
-		return fmt.Sprintf("%s://%s/oauth/%s", scheme, host, provider)
+		return fmt.Sprintf("%s://%s/api/oauth/%s", scheme, host, provider)
 	}
 
 	// Fallback to configured ServerAddress
-	return fmt.Sprintf("%s/oauth/%s", common.OptionMap["ServerAddress"], provider)
+	return fmt.Sprintf("%s/api/oauth/%s", common.OptionMap["ServerAddress"], provider)
 }
 
 // OAuthToken represents the token received from OAuth provider
