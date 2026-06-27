@@ -1,0 +1,99 @@
+# New-API 生产环境 Docker Compose 配置
+# 域名：umniai.ru (IP: 170.168.89.127)
+#
+# 使用方法：
+#   1. 首次部署：bash deploy/init-ssl.sh
+#   2. 启动服务：docker compose -f docker-compose.prod.yml up -d
+#   3. 切换 HTTPS：bash deploy/switch-https.sh
+#
+# ⚠️ 部署前必须修改所有 CHANGE_THIS_PASSWORD 为强密码！
+
+services:
+  new-api:
+    image: calciumion/new-api:latest
+    container_name: new-api
+    restart: always
+    command: --log-dir /app/logs
+    volumes:
+      - ./data:/data
+      - ./logs:/app/logs
+    environment:
+      # ⚠️ 生产环境必须修改以下所有密码
+      - SQL_DSN=postgresql://newapi:TLDzy20250610..@postgres:5432/newapi?sslmode=disable
+      - REDIS_CONN_STRING=redis://:ff783f203d74570ec93edb4617b90c51189626407bb5ce75@redis:6379
+      - TZ=Asia/Shanghai
+      - ERROR_LOG_ENABLED=true
+      - BATCH_UPDATE_ENABLED=true
+      - NODE_NAME=umniai-prod
+      # 服务器地址 — 用于 OAuth 回调、支付返回、密码重置链接等
+      - TRUSTED_REDIRECT_DOMAINS=umniai.ru
+      # 多机部署时必须设置随机字符串
+      - SESSION_SECRET=d2555b4adc2d44d96a49aa0da5ab1d9bdbb5a86b1ead4b3d5e0809085fdda7e3
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - new-api-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/status | grep -o '\"success\":\\s*true' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    # 不直接暴露端口，通过 Nginx 反向代理访问
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: umniai-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d:ro
+      - certbot-www:/var/www/certbot:ro
+      - certbot-certs:/etc/letsencrypt:ro
+    depends_on:
+      - new-api
+    networks:
+      - new-api-network
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: umniai-certbot
+    profiles: ["certbot"]
+    volumes:
+      - certbot-www:/var/www/certbot
+      - certbot-certs:/etc/letsencrypt
+    # 仅在需要获取/续期证书时运行：
+    # docker compose -f docker-compose.prod.yml --profile certbot run --rm certbot certonly --webroot -w /var/www/certbot -d umniai.ru -d www.umniai.ru --email admin@umniai.ru --agree-tos --no-eff-email
+
+  redis:
+    image: redis:7-alpine
+    container_name: new-api-redis
+    restart: always
+    command: ["redis-server", "--requirepass", "ff783f203d74570ec93edb4617b90c51189626407bb5ce75", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    networks:
+      - new-api-network
+
+  postgres:
+    image: postgres:16
+    container_name: new-api-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: newapi
+      POSTGRES_PASSWORD: TLDzy20250610..
+      POSTGRES_DB: newapi
+      TZ: Asia/Shanghai
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - new-api-network
+
+volumes:
+  pg_data:
+  certbot-www:
+  certbot-certs:
+
+networks:
+  new-api-network:
+    driver: bridge
