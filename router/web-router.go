@@ -3,13 +3,14 @@ package router
 import (
 	"embed"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/controller"
 	"github.com/QuantumNous/new-api/middleware"
 	"github.com/gin-contrib/gzip"
-	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,14 +23,54 @@ type ThemeAssets struct {
 }
 
 func SetWebRouter(router *gin.Engine, assets ThemeAssets) {
-	defaultFS := common.EmbedFolder(assets.DefaultBuildFS, "web/default/dist")
-	classicFS := common.EmbedFolder(assets.ClassicBuildFS, "web/classic/dist")
-	themeFS := common.NewThemeAwareFS(defaultFS, classicFS)
+	// Fallback: serve index.html from disk when embed FS is empty
+	if assets.DefaultIndexPage == nil {
+		data, err := os.ReadFile(filepath.Join("web", "default", "dist", "index.html"))
+		if err == nil {
+			assets.DefaultIndexPage = data
+		}
+	}
+	if assets.ClassicIndexPage == nil {
+		data, err := os.ReadFile(filepath.Join("web", "classic", "dist", "index.html"))
+		if err == nil {
+			assets.ClassicIndexPage = data
+		}
+	}
+
+	// Determine the static file root directory based on theme
+	getStaticDir := func() string {
+		if common.GetTheme() == "classic" {
+			return filepath.Join("web", "classic", "dist")
+		}
+		return filepath.Join("web", "default", "dist")
+	}
 
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
+
+	// Static file handler runs BEFORE rate limit to avoid 429s on page load.
+	router.Use(func(c *gin.Context) {
+		path := c.Request.URL.Path
+		if path == "/" {
+			c.Next()
+			return
+		}
+		if !strings.HasPrefix(path, "/static/") && !strings.HasPrefix(path, "/logo.") && !strings.HasPrefix(path, "/favicon.") && path != "/logo.png" && path != "/favicon.ico" && !strings.HasPrefix(path, "/pay-") && !strings.HasPrefix(path, "/waffo-") && !strings.HasPrefix(path, "/yoomoney-") {
+			c.Next()
+			return
+		}
+		fullPath := filepath.Join(getStaticDir(), path)
+		if info, err := os.Stat(fullPath); err == nil && !info.IsDir() {
+			c.Header("Cache-Control", "max-age=604800")
+			http.ServeFile(c.Writer, c.Request, fullPath)
+			c.Abort()
+			return
+		}
+		c.Next()
+	})
+
 	router.Use(middleware.GlobalWebRateLimit())
 	router.Use(middleware.Cache())
-	router.Use(static.Serve("/", themeFS))
+
 	router.NoRoute(func(c *gin.Context) {
 		c.Set(middleware.RouteTagKey, "web")
 		if strings.HasPrefix(c.Request.RequestURI, "/v1") || strings.HasPrefix(c.Request.RequestURI, "/api") || strings.HasPrefix(c.Request.RequestURI, "/assets") {

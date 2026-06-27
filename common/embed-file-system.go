@@ -35,12 +35,21 @@ func (e *embedFileSystem) Open(name string) (http.File, error) {
 func EmbedFolder(fsEmbed embed.FS, targetPath string) static.ServeFileSystem {
 	efs, err := fs.Sub(fsEmbed, targetPath)
 	if err != nil {
-		panic(err)
+		// Fallback to disk-based serving when frontend is not embedded.
+		if info, statErr := os.Stat(targetPath); statErr == nil && info.IsDir() {
+			return &embedFileSystem{FileSystem: http.Dir(targetPath)}
+		}
+		return &embedFileSystem{FileSystem: http.FS(noopFS{})}
 	}
 	return &embedFileSystem{
 		FileSystem: http.FS(efs),
 	}
 }
+
+// noopFS is an fs.FS that always returns fs.ErrNotExist.
+type noopFS struct{}
+
+func (noopFS) Open(name string) (fs.File, error) { return nil, fs.ErrNotExist }
 
 // themeAwareFileSystem delegates to the appropriate embedded FS based on
 // the current theme (via GetTheme). This enables runtime theme switching
