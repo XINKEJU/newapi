@@ -39,3 +39,6 @@ skills-lock.json
 
 # WorkBuddy local workspace (memory, skills, etc.)
 .workbuddy/
+
+# SSL private keys (never commit)
+nginx/certs/privkey.pem
