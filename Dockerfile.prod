@@ -1,0 +1,14 @@
+# Minimal production Dockerfile for new-api  
+# Binary is cross-compiled externally, frontend served via volume mount
+FROM debian:bookworm-slim
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates tzdata wget \
+    && rm -rf /var/lib/apt/lists/* \
+    && update-ca-certificates
+
+COPY new-api-linux /new-api
+
+EXPOSE 3000
+WORKDIR /data
+ENTRYPOINT ["/new-api"]
