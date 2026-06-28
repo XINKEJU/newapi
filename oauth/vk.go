@@ -214,8 +214,9 @@ func (p *VKProvider) GetUserInfoFromAccessToken(ctx context.Context, accessToken
 	logger.LogDebug(ctx, "[OAuth-VK] GetUserInfoFromAccessToken: verifying token via VK ID API")
 
 	formData := url.Values{
-		"client_id":    {common.VKClientId},
-		"access_token": {accessToken},
+		"client_id":     {common.VKClientId},
+		"client_secret": {common.VKClientSecret},
+		"access_token":  {accessToken},
 	}
 
 	req, err := http.NewRequestWithContext(ctx, "POST", "https://id.vk.ru/oauth2/user_info", strings.NewReader(formData.Encode()))
