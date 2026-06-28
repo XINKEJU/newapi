@@ -50,10 +50,18 @@ func SetWebRouter(router *gin.Engine, assets ThemeAssets) {
 	// Static file handler runs BEFORE rate limit to avoid 429s on page load.
 	router.Use(func(c *gin.Context) {
 		path := c.Request.URL.Path
-		if path == "/" {
-			c.Next()
-			return
+
+		// Serve index.html directly from disk (fresh on every request)
+		if path == "/" || path == "/index.html" {
+			indexPath := filepath.Join(getStaticDir(), "index.html")
+			if info, err := os.Stat(indexPath); err == nil && !info.IsDir() {
+				c.Header("Cache-Control", "no-cache, must-revalidate")
+				http.ServeFile(c.Writer, c.Request, indexPath)
+				c.Abort()
+				return
+			}
 		}
+
 		if !strings.HasPrefix(path, "/static/") && !strings.HasPrefix(path, "/logo.") && !strings.HasPrefix(path, "/favicon.") && path != "/logo.png" && path != "/favicon.ico" && !strings.HasPrefix(path, "/pay-") && !strings.HasPrefix(path, "/waffo-") && !strings.HasPrefix(path, "/yoomoney-") {
 			c.Next()
 			return
