@@ -27,6 +27,7 @@ import {
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useOAuthLogin } from '../hooks/use-oauth-login'
+import { TelegramLoginButton } from './telegram-login-button'
 import type { SystemStatus } from '../types'
 
 type OAuthProvidersProps = {
@@ -66,6 +67,8 @@ export function OAuthProviders({
     handleTelegramLogin,
     handleCustomOAuthLogin,
   } = useOAuthLogin(status)
+
+  const showTelegram = status?.telegram_oauth && status?.telegram_bot_name
 
   const providerButtons: ProviderButton[] = []
 
@@ -142,14 +145,6 @@ export function OAuthProviders({
     })
   }
 
-  if (status?.telegram_oauth) {
-    providerButtons.push({
-      key: 'telegram',
-      label: t('Continue with Telegram'),
-      onClick: handleTelegramLogin,
-    })
-  }
-
   // Custom OAuth providers
   const customProviders = status?.custom_oauth_providers
   if (customProviders && customProviders.length > 0) {
@@ -162,7 +157,7 @@ export function OAuthProviders({
     }
   }
 
-  if (providerButtons.length === 0) return null
+  if (providerButtons.length === 0 && !showTelegram) return null
 
   return (
     <div className={cn('space-y-3', className)}>
@@ -194,6 +189,13 @@ export function OAuthProviders({
           )
         )}
       </div>
+
+      {showTelegram && (
+        <TelegramLoginButton
+          botName={status!.telegram_bot_name!}
+          onAuth={handleTelegramLogin}
+        />
+      )}
     </div>
   )
 }

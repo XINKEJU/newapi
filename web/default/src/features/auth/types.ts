@@ -102,6 +102,7 @@ export interface SystemStatus {
     linuxdo_oauth?: boolean
     linuxdo_client_id?: string
     telegram_oauth?: boolean
+    telegram_bot_name?: string
     vk_oauth?: boolean
     vk_client_id?: string
     yandex_oauth?: boolean
@@ -151,6 +152,7 @@ export interface SystemStatus {
   linuxdo_oauth?: boolean
   linuxdo_client_id?: string
   telegram_oauth?: boolean
+  telegram_bot_name?: string
   vk_oauth?: boolean
   vk_client_id?: string
   yandex_oauth?: boolean
