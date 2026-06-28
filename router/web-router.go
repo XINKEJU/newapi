@@ -60,9 +60,15 @@ func SetWebRouter(router *gin.Engine, assets ThemeAssets) {
 		}
 		fullPath := filepath.Join(getStaticDir(), path)
 		if info, err := os.Stat(fullPath); err == nil && !info.IsDir() {
-			c.Header("Cache-Control", "max-age=604800")
+			c.Header("Cache-Control", "max-age=86400")
 			http.ServeFile(c.Writer, c.Request, fullPath)
 			c.Abort()
+			return
+		}
+		// For /static/ paths: return 404 instead of falling through to SPA index.html
+		// This prevents SyntaxError from returned HTML when old JS files are missing
+		if strings.HasPrefix(path, "/static/") {
+			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}
 		c.Next()
