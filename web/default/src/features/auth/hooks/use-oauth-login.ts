@@ -207,41 +207,6 @@ export function useOAuthLogin(status: SystemStatus | null) {
     }
   }
 
-  const handleTelegramLogin = async (telegramUser: {
-    id: number
-    first_name: string
-    last_name?: string
-    username?: string
-    photo_url?: string
-    auth_date: number
-    hash: string
-  }) => {
-    setIsLoading(true)
-    try {
-      const res = await api.get('/api/oauth/telegram/login', {
-        params: telegramUser,
-      })
-
-      if (res.data.success) {
-        const loginUser = res.data.data as AuthUser
-        useAuthStore.getState().auth.setUser(loginUser)
-        try {
-          if (typeof window !== 'undefined' && loginUser?.id != null) {
-            window.localStorage.setItem('uid', String(loginUser.id))
-          }
-        } catch {
-          // ignore storage errors
-        }
-        toast.success(t('Signed in successfully!'))
-        window.location.href = '/dashboard'
-      } else {
-        toast.error(res.data.message || t('Failed to start Telegram login'))
-      }
-    } catch (_error) {
-      toast.error(t('Failed to start Telegram login'))
-    } finally {
-      setIsLoading(false)
-    }
   }
 
   const handleVKLogin = async () => {
@@ -363,7 +328,6 @@ export function useOAuthLogin(status: SystemStatus | null) {
     handleDiscordLogin,
     handleOIDCLogin,
     handleLinuxDOLogin,
-    handleTelegramLogin,
     handleVKLogin,
     handleYandexLogin,
     handleCustomOAuthLogin,

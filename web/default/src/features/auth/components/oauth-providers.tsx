@@ -66,7 +66,6 @@ export function OAuthProviders({
     handleLinuxDOLogin,
     handleVKLogin,
     handleYandexLogin,
-    handleTelegramLogin,
     handleCustomOAuthLogin,
   } = useOAuthLogin(status)
 
@@ -186,7 +185,6 @@ export function OAuthProviders({
       {showTelegram && (
         <TelegramLoginButton
           botName={status!.telegram_bot_name!}
-          onAuth={handleTelegramLogin}
         />
       )}
     </div>

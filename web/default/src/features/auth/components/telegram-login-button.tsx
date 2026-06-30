@@ -16,36 +16,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 
-declare global {
-  interface Window {
-    TelegramLoginWidget?: {
-      dataOnauth?: (user: TelegramUser) => void
-    }
-  }
-}
-
-export interface TelegramUser {
-  id: number
-  first_name: string
-  last_name?: string
-  username?: string
-  photo_url?: string
-  auth_date: number
-  hash: string
-}
-
 interface TelegramLoginButtonProps {
   botName: string
-  onAuth: (user: TelegramUser) => void
   className?: string
 }
-
-const WIDGET_SCRIPT = 'https://telegram.org/js/telegram-widget.js?22'
-const WIDGET_TIMEOUT_MS = 3000
 
 const TelegramIcon = () => (
   <svg width='18' height='18' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'>
@@ -58,81 +36,26 @@ const TelegramIcon = () => (
 )
 
 export function TelegramLoginButton({
-  botName,
-  onAuth,
+  botName: _botName,
   className = '',
 }: TelegramLoginButtonProps) {
   const { t } = useTranslation()
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [widgetFailed, setWidgetFailed] = useState(false)
-  const onAuthRef = useRef(onAuth)
-  onAuthRef.current = onAuth
 
-  const handleTelegramAuth = useCallback((user: TelegramUser) => {
-    onAuthRef.current(user)
+  const handleTelegramClick = useCallback(() => {
+    window.open('/api/oauth/telegram', '_self')
   }, [])
-
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container || !botName) return
-
-    setWidgetFailed(false)
-
-    window.TelegramLoginWidget = {
-      dataOnauth: handleTelegramAuth,
-    }
-
-    container.innerHTML = ''
-
-    const script = document.createElement('script')
-    script.src = WIDGET_SCRIPT
-    script.async = true
-    script.setAttribute('data-telegram-login', botName)
-    script.setAttribute('data-size', 'large')
-    script.setAttribute('data-radius', '8')
-    script.setAttribute('data-onauth', 'TelegramLoginWidget.dataOnauth(user)')
-    script.setAttribute('data-request-access', 'write')
-
-    container.appendChild(script)
-
-    const timeoutId = setTimeout(() => {
-      if (container.children.length <= 1) {
-        setWidgetFailed(true)
-      }
-    }, WIDGET_TIMEOUT_MS)
-
-    return () => {
-      delete window.TelegramLoginWidget
-      clearTimeout(timeoutId)
-    }
-  }, [botName, handleTelegramAuth])
-
-  const handleFallbackClick = () => {
-    window.open(`https://t.me/${botName}`, '_blank')
-  }
 
   return (
     <div className={className}>
-      {/* Primary: Telegram Login Widget */}
-      <div
-        ref={containerRef}
-        style={{ minHeight: 44, display: 'flex', justifyContent: 'center' }}
-      />
-
-      {/* Fallback: shown when widget fails to load, or as a secondary option */}
-      {widgetFailed && (
-        <div className='mt-2 space-y-2'>
-          <Button
-            variant='outline'
-            type='button'
-            onClick={handleFallbackClick}
-            className='h-11 w-full justify-center gap-2 rounded-lg'
-          >
-            <TelegramIcon />
-            {t('Continue with Telegram')}
-          </Button>
-        </div>
-      )}
+      <Button
+        variant='outline'
+        type='button'
+        onClick={handleTelegramClick}
+        className='h-11 w-full justify-center gap-2 rounded-lg'
+      >
+        <TelegramIcon />
+        {t('Continue with Telegram')}
+      </Button>
     </div>
   )
 }
