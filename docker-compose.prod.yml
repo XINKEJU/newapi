@@ -39,7 +39,7 @@ services:
       timeout: 10s
       retries: 3
     security_opt:
-      - no_new_privileges:true
+      - no-new-privileges:true
     cap_drop:
       - ALL
     deploy:
@@ -65,7 +65,7 @@ services:
     networks:
       - new-api-network
     security_opt:
-      - no_new_privileges:true
+      - no-new-privileges:true
     cap_drop:
       - ALL
     cap_add:
@@ -99,7 +99,7 @@ services:
       timeout: 5s
       retries: 5
     security_opt:
-      - no_new_privileges:true
+      - no-new-privileges:true
     cap_drop:
       - ALL
     deploy:
@@ -126,7 +126,7 @@ services:
       timeout: 5s
       retries: 5
     security_opt:
-      - no_new_privileges:true
+      - no-new-privileges:true
     cap_drop:
       - ALL
     deploy:
