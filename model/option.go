@@ -135,8 +135,8 @@ func InitOptionMap() {
 	common.OptionMap["PayMethods"] = operation_setting.PayMethods2JsonString()
 	common.OptionMap["GitHubClientId"] = ""
 	common.OptionMap["GitHubClientSecret"] = ""
-	common.OptionMap["TelegramBotToken"] = ""
-	common.OptionMap["TelegramBotName"] = ""
+	common.OptionMap["TelegramBotToken"] = common.TelegramBotToken
+	common.OptionMap["TelegramBotName"] = common.TelegramBotName
 	common.OptionMap["VKClientId"] = ""
 	common.OptionMap["VKClientSecret"] = ""
 	common.OptionMap["YandexClientId"] = ""

@@ -187,6 +187,9 @@ func initConstantEnv() {
 	TelegramOAuthEnabled = GetEnvOrDefaultBool("TELEGRAM_OAUTH_ENABLED", false)
 	TelegramBotToken = GetEnvOrDefaultString("TELEGRAM_BOT_TOKEN", "")
 	TelegramBotName = GetEnvOrDefaultString("TELEGRAM_BOT_NAME", "")
+	if TelegramOAuthEnabled {
+		SysLog(fmt.Sprintf("Telegram OAuth enabled from env, bot_name=%s", TelegramBotName))
+	}
 
 	VKOAuthEnabled = GetEnvOrDefaultBool("VK_OAUTH_ENABLED", false)
 	VKClientId = GetEnvOrDefaultString("VK_CLIENT_ID", "")
