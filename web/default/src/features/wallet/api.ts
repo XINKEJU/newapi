@@ -235,18 +235,6 @@ export async function completeOrder(
 }
 
 /**
- * Calculate payment amount for YooMoney payment
- */
-export async function calculateYooMoneyAmount(
-  request: AmountRequest
-): Promise<AmountResponse> {
-  const res = await api.post('/api/yoomoney/amount', request, {
-    skipBusinessError: true,
-  } as Record<string, unknown>)
-  return res.data
-}
-
-/**
  * Request YooMoney topup payment
  */
 export async function requestYooMoneyPayment(

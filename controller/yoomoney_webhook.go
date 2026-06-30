@@ -64,7 +64,7 @@ func YooMoneyNotify(c *gin.Context) {
 	}
 
 	if err := service.VerifyYooMoneyParams(params, notificationSecret); err != nil {
-		common.SysError(fmt.Sprintf("YooMoney notify: signature verification failed: %v, params: %+v", err, params))
+		common.SysError(fmt.Sprintf("YooMoney notify: signature verification failed: %v, label=%s", err, params["label"]))
 		c.String(http.StatusOK, "fail")
 		return
 	}
@@ -127,7 +127,7 @@ func YooMoneyReturn(c *gin.Context) {
 	}
 
 	if err := service.VerifyYooMoneyParams(params, notificationSecret); err != nil {
-		common.SysError(fmt.Sprintf("YooMoney return: signature verification failed: %v", err))
+		common.SysError(fmt.Sprintf("YooMoney return: signature verification failed: %v, label=%s", err, params["label"]))
 		c.Redirect(http.StatusFound, paymentReturnPath("/console/wallet?pay=fail"))
 		return
 	}

@@ -3,12 +3,13 @@ package gigachat
 import (
 	"bytes"
 	"crypto/tls"
-	"github.com/QuantumNous/new-api/common"
 	"fmt"
 	"io"
 	"net/http"
-	"sync"
 	"time"
+
+	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/pkg/cachex"
 
 	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/dto"
@@ -20,37 +21,45 @@ import (
 )
 
 // ──────────────────────────────────────────────────────────────────────────────
-// OAuth2 token cache
+// OAuth2 token cache (backed by Redis when available, in-memory otherwise)
 // ──────────────────────────────────────────────────────────────────────────────
 
-type cachedToken struct {
-	token     string
-	expiresAt time.Time
+var gigaChatTokenCache *cachex.HybridCache[cachedToken]
+
+
+// GigaChat uses a self-signed cert on their OAuth endpoint; we skip verification
+// only for the token fetch (not for the main API calls).
+var oauthClient = &http.Client{
+	Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
+	},
+	Timeout: 10 * time.Second,
 }
 
-var (
-	tokenStore sync.Map
-	// GigaChat uses a self-signed cert on their OAuth endpoint; we skip verification
-	// only for the token fetch (not for the main API calls).
-	oauthClient = &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
+func init() {
+	gigaChatTokenCache = cachex.NewHybridCache(cachex.HybridCacheConfig[cachedToken]{
+		Namespace: cachex.Namespace("gigachat:v1"),
+		RedisCodec: &cachex.JSONCodec[cachedToken]{},
+		Redis:      common.RDB,
+		RedisEnabled: func() bool {
+			return common.RedisEnabled
 		},
-		Timeout: 10 * time.Second,
-	}
-)
+	})
+}
+
+// cachedToken holds an access token and absolute expiry.
+type cachedToken struct {
+	Token     string    `json:"token"`
+	ExpiresAt time.Time `json:"expires_at"`
+}
 
 const gigaChatOAuthURL = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
 
 // getAccessToken returns a valid Bearer token, fetching a new one if necessary.
-// apiKey must be the Base64-encoded "ClientID:ClientSecret" pair issued by
-// the Sber developer portal (the "Authorization" header value for the OAuth
-// request, without the "Basic " prefix).
 func getAccessToken(apiKey string) (string, error) {
-	if val, ok := tokenStore.Load(apiKey); ok {
-		ct := val.(cachedToken)
-		if time.Now().Add(60 * time.Second).Before(ct.expiresAt) {
-			return ct.token, nil
+	if val, found, _ := gigaChatTokenCache.Get(apiKey); found {
+		if time.Now().Add(60 * time.Second).Before(val.ExpiresAt) {
+			return val.Token, nil
 		}
 	}
 	return fetchToken(apiKey)
@@ -83,14 +92,19 @@ func fetchToken(apiKey string) (string, error) {
 	if err := common.Unmarshal(respBody, &tokenResp); err != nil {
 		return "", err
 	}
-	expiresAt := time.UnixMilli(tokenResp.ExpiresAt)
-	tokenStore.Store(apiKey, cachedToken{
-		token:     tokenResp.AccessToken,
-		expiresAt: expiresAt,
-	})
-	return tokenResp.AccessToken, nil
+	ct := cachedToken{
+		Token:     tokenResp.AccessToken,
+		ExpiresAt: time.UnixMilli(tokenResp.ExpiresAt),
+	}
+	ttl := time.Until(ct.ExpiresAt)
+	if ttl <= 0 {
+		return "", fmt.Errorf("gigachat: OAuth returned already-expired token")
+	}
+	if err := gigaChatTokenCache.SetWithTTL(apiKey, ct, ttl); err != nil {
+		common.SysLog("gigachat: failed to cache token: " + err.Error())
+	}
+	return ct.Token, nil
 }
-
 // ──────────────────────────────────────────────────────────────────────────────
 // Response helpers
 // ──────────────────────────────────────────────────────────────────────────────
