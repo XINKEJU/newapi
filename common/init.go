@@ -55,11 +55,14 @@ func InitEnv() {
 		} else {
 			SessionSecret = ss
 		}
+	} else {
+		SysLog("WARNING: SESSION_SECRET is not set. Using a random value — all sessions will be invalidated on restart. Set SESSION_SECRET in the environment for production.")
 	}
 	if os.Getenv("CRYPTO_SECRET") != "" {
 		CryptoSecret = os.Getenv("CRYPTO_SECRET")
 	} else {
 		CryptoSecret = SessionSecret
+		SysLog("WARNING: CRYPTO_SECRET is not set, falling back to SESSION_SECRET. Set a separate CRYPTO_SECRET for better key isolation.")
 	}
 	if os.Getenv("SQLITE_PATH") != "" {
 		SQLitePath = os.Getenv("SQLITE_PATH")

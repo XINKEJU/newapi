@@ -40,8 +40,15 @@ skills-lock.json
 # WorkBuddy local workspace (memory, skills, etc.)
 .workbuddy/
 
-# SSL private keys (never commit)
+# SSL certificates (never commit)
 nginx/certs/privkey.pem
+nginx/certs/fullchain.pem
+
+# Production secrets (use .env.prod instead, never commit)
+.env.prod
+.env.*.local
+docker-compose.*.local.yml
+
 # Local-only live probes and scratch test workspaces.
 .local-tests/
 service/relayconvert/chat_responses_live_local_test.go

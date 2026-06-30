@@ -5,10 +5,14 @@ FROM debian:bookworm-slim
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates tzdata wget \
     && rm -rf /var/lib/apt/lists/* \
-    && update-ca-certificates
+    && update-ca-certificates \
+    && groupadd -r appuser && useradd -r -g appuser -d /data -s /sbin/nologin appuser
 
 COPY new-api-linux /new-api
+COPY LICENSE NOTICE /licenses/
 
 EXPOSE 3000
 WORKDIR /data
+RUN chown -R appuser:appuser /data /licenses /new-api
+USER appuser
 ENTRYPOINT ["/new-api"]
