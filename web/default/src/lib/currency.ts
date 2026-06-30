@@ -186,9 +186,16 @@ function getDisplayMeta(config: CurrencyConfig): DisplayMeta {
     case 'CNY':
       return {
         kind: 'currency',
-        symbol: '¥',
+        symbol: '\u00A5',
         currencyCode: 'CNY',
-        exchangeRate: config.usdExchangeRate,
+        exchangeRate: config.cnyExchangeRate || config.usdExchangeRate || 7.25,
+      }
+    case 'RUB':
+      return {
+        kind: 'currency',
+        symbol: '\u20BD',
+        currencyCode: 'RUB',
+        exchangeRate: config.rubExchangeRate || 90,
       }
     case 'CUSTOM':
       return {
@@ -521,6 +528,8 @@ export function getCurrencyLabel(): string {
   switch (config.quotaDisplayType) {
     case 'CNY':
       return 'CNY'
+    case 'RUB':
+      return 'RUB'
     case 'CUSTOM':
       return meta.kind === 'custom' ? meta.symbol : 'Custom'
     case 'USD':
