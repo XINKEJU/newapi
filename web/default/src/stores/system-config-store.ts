@@ -52,7 +52,7 @@ export interface SystemConfig {
 
 export const DEFAULT_CURRENCY_CONFIG: CurrencyConfig = {
   displayInCurrency: true,
-  quotaDisplayType: 'RUB',
+  quotaDisplayType: 'USD',
   quotaPerUnit: 500000,
   cnyExchangeRate: 7.25,
   rubExchangeRate: 90,

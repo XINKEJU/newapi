@@ -6,6 +6,11 @@ This file is the old version of the payment settings file. If you need to add ne
 package operation_setting
 
 import (
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+
 	"github.com/QuantumNous/new-api/common"
 )
 
@@ -13,11 +18,40 @@ var PayAddress = ""
 var CustomCallbackAddress = ""
 var EpayId = ""
 var EpayKey = ""
-var Price = 90.0
+var Price = 7.3 // 1 USD = X units of local currency (override via PRICE env or DB)
 var MinTopUp = 1
 var USDExchangeRate = 7.25    // 1 USD = 7.25 CNY（原值 90 是 RUB 汇率，现已拆分）
 var CNYExchangeRate = 7.25    // 1 USD = X CNY
 var RUBExchangeRate = 90.0    // 1 USD = X RUB
+
+func init() {
+	// Price and exchange rate defaults — override via env for regional deployments
+	if v := os.Getenv("PRICE"); v != "" {
+		if f, err := strconv.ParseFloat(v, 64); err == nil {
+			Price = f
+			common.SysLog(fmt.Sprintf("env override: Price = %.2f", f))
+		}
+	}
+	if v := os.Getenv("CNY_EXCHANGE_RATE"); v != "" {
+		if f, err := strconv.ParseFloat(v, 64); err == nil {
+			CNYExchangeRate = f
+			common.SysLog(fmt.Sprintf("env override: CNYExchangeRate = %.2f", f))
+		}
+	}
+	if v := os.Getenv("RUB_EXCHANGE_RATE"); v != "" {
+		if f, err := strconv.ParseFloat(v, 64); err == nil {
+			RUBExchangeRate = f
+			common.SysLog(fmt.Sprintf("env override: RUBExchangeRate = %.2f", f))
+		}
+	}
+	if v := os.Getenv("QUOTA_DISPLAY_TYPE"); v != "" {
+		switch strings.ToUpper(v) {
+		case "USD", "CNY", "RUB", "TOKENS", "CUSTOM":
+			GetGeneralSetting().QuotaDisplayType = strings.ToUpper(v)
+			common.SysLog(fmt.Sprintf("env override: QuotaDisplayType = %s", v))
+		}
+	}
+}
 
 var PayMethods = []map[string]string{
 	{
@@ -29,13 +63,7 @@ var PayMethods = []map[string]string{
 		"name":  "Stripe",
 		"color": "rgba(99, 91, 255, 1)",
 		"type":  "stripe",
-	},
-	{
-		"name":  "SberPay",
-		"color": "rgba(34, 167, 77, 1)",
-		"type":  "sberpay",
-	},
-	{
+	},	{
 		"name": "支付宝",
 		"icon": "SiAlipay",
 		"type": "alipay",

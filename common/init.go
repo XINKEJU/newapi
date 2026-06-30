@@ -202,22 +202,28 @@ func initConstantEnv() {
 func InitOAuthFromEnv() {
 	if os.Getenv("GITHUB_OAUTH_ENABLED") != "" {
 		GitHubOAuthEnabled = GetEnvOrDefaultBool("GITHUB_OAUTH_ENABLED", GitHubOAuthEnabled)
+		SysLog("env override: GitHubOAuthEnabled set")
 	}
 	if os.Getenv("GITHUB_CLIENT_ID") != "" {
 		GitHubClientId = os.Getenv("GITHUB_CLIENT_ID")
+		SysLog("env override: GitHubClientId set")
 	}
 	if os.Getenv("GITHUB_CLIENT_SECRET") != "" {
 		GitHubClientSecret = os.Getenv("GITHUB_CLIENT_SECRET")
+		SysLog("env override: GitHubClientSecret set")
 	}
 
 	if os.Getenv("TELEGRAM_OAUTH_ENABLED") != "" {
 		TelegramOAuthEnabled = GetEnvOrDefaultBool("TELEGRAM_OAUTH_ENABLED", TelegramOAuthEnabled)
+		SysLog("env override: TelegramOAuthEnabled set")
 	}
 	if os.Getenv("TELEGRAM_BOT_TOKEN") != "" {
 		TelegramBotToken = os.Getenv("TELEGRAM_BOT_TOKEN")
+		SysLog("env override: TelegramBotToken set")
 	}
 	if os.Getenv("TELEGRAM_BOT_NAME") != "" {
 		TelegramBotName = os.Getenv("TELEGRAM_BOT_NAME")
+		SysLog("env override: TelegramBotName set")
 	}
 
 	if os.Getenv("VK_OAUTH_ENABLED") != "" {

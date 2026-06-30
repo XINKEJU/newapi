@@ -1,9 +1,12 @@
 package setting
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/QuantumNous/new-api/common"
 )
 
 // 从环境变量读取，若未设置则使用默认值
@@ -63,23 +66,30 @@ func GetYoomoneyMinTopUp() int {
 func InitYoomoneyFromEnv() {
 	if os.Getenv("YOOMONEY_ENABLED") != "" {
 		YoomoneyEnabled = getEnvBool("YOOMONEY_ENABLED", YoomoneyEnabled)
+		common.SysLog("env override: YoomoneyEnabled set")
 	}
 	if os.Getenv("YOOMONEY_WALLET_ID") != "" {
 		YoomoneyWalletId = os.Getenv("YOOMONEY_WALLET_ID")
+		common.SysLog("env override: YoomoneyWalletId set")
 	}
 	if os.Getenv("YOOMONEY_API_KEY") != "" {
 		YoomoneyApiKey = os.Getenv("YOOMONEY_API_KEY")
+		common.SysLog("env override: YoomoneyApiKey set")
 	}
 	if os.Getenv("YOOMONEY_NOTIFY_SECRET") != "" {
 		YoomoneyNotifySecret = os.Getenv("YOOMONEY_NOTIFY_SECRET")
+		common.SysLog("env override: YoomoneyNotifySecret set")
 	}
 	if os.Getenv("YOOMONEY_TEST_MODE") != "" {
 		YoomoneyTestMode = getEnvBool("YOOMONEY_TEST_MODE", YoomoneyTestMode)
+		common.SysLog("env override: YoomoneyTestMode set")
 	}
 	if os.Getenv("YOOMONEY_CURRENCY") != "" {
 		YoomoneyCurrency = os.Getenv("YOOMONEY_CURRENCY")
+		common.SysLog(fmt.Sprintf("env override: YoomoneyCurrency = %s", YoomoneyCurrency))
 	}
 	if os.Getenv("YOOMONEY_MIN_TOPUP") != "" {
 		YoomoneyMinTopUp = getEnvInt("YOOMONEY_MIN_TOPUP", YoomoneyMinTopUp)
+		common.SysLog(fmt.Sprintf("env override: YoomoneyMinTopUp = %d", YoomoneyMinTopUp))
 	}
 }
