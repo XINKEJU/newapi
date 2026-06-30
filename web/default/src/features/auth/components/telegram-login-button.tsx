@@ -45,7 +45,16 @@ interface TelegramLoginButtonProps {
 }
 
 const WIDGET_SCRIPT = 'https://telegram.org/js/telegram-widget.js?22'
-const WIDGET_TIMEOUT_MS = 5000
+const WIDGET_TIMEOUT_MS = 3000
+
+const TelegramIcon = () => (
+  <svg width='18' height='18' viewBox='0 0 24 24' fill='none'>
+    <path
+      d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.19.19 0 0 0-.05-.18c-.05-.03-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27.01.08.03.25.02.39z'
+      fill='#26A5E4'
+    />
+  </svg>
+)
 
 export function TelegramLoginButton({
   botName,
@@ -68,15 +77,12 @@ export function TelegramLoginButton({
 
     setWidgetFailed(false)
 
-    // Set up the global callback before Telegram script renders the widget
     window.TelegramLoginWidget = {
       dataOnauth: handleTelegramAuth,
     }
 
-    // Clean any previous widget
     container.innerHTML = ''
 
-    // Create the Telegram login widget script element
     const script = document.createElement('script')
     script.src = WIDGET_SCRIPT
     script.async = true
@@ -88,9 +94,7 @@ export function TelegramLoginButton({
 
     container.appendChild(script)
 
-    // Set a timeout: if the widget doesn't render within the timeout, show fallback
     const timeoutId = setTimeout(() => {
-      // Check if the widget rendered an iframe (script tag + iframe = 2 children)
       if (container.children.length <= 1) {
         setWidgetFailed(true)
       }
@@ -103,32 +107,31 @@ export function TelegramLoginButton({
   }, [botName, handleTelegramAuth])
 
   const handleFallbackClick = () => {
-    window.location.href = '/api/oauth/telegram'
-  }
-
-  if (widgetFailed) {
-    return (
-      <div className={className} style={{ display: 'flex', justifyContent: 'center' }}>
-        <Button
-          variant='outline'
-          type='button'
-          onClick={handleFallbackClick}
-          className='h-11 w-full justify-center gap-2 rounded-lg'
-        >
-          <svg width='18' height='18' viewBox='0 0 24 24' fill='#26A5E4'>
-            <path d='M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.46-1.901-.903-1.056-.692-1.653-1.123-2.678-1.798-1.185-.781-.417-1.21.258-1.911.177-.184 3.247-2.977 3.307-3.23.007-.032.015-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.441-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.015 3.333-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.139.121.098.154.228.17.32.016.092.036.302.02.466z'/>
-          </svg>
-          {t('Continue with Telegram')}
-        </Button>
-      </div>
-    )
+    window.open(`https://t.me/${botName}`, '_blank')
   }
 
   return (
-    <div
-      ref={containerRef}
-      className={className}
-      style={{ minHeight: 44, display: 'flex', justifyContent: 'center' }}
-    />
+    <div className={className}>
+      {/* Primary: Telegram Login Widget */}
+      <div
+        ref={containerRef}
+        style={{ minHeight: 44, display: 'flex', justifyContent: 'center' }}
+      />
+
+      {/* Fallback: shown when widget fails to load, or as a secondary option */}
+      {widgetFailed && (
+        <div className='mt-2 space-y-2'>
+          <Button
+            variant='outline'
+            type='button'
+            onClick={handleFallbackClick}
+            className='h-11 w-full justify-center gap-2 rounded-lg'
+          >
+            <TelegramIcon />
+            {t('Continue with Telegram')}
+          </Button>
+        </div>
+      )}
+    </div>
   )
 }
