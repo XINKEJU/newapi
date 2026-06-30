@@ -62,7 +62,7 @@ func SetWebRouter(router *gin.Engine, assets ThemeAssets) {
 			}
 		}
 
-		if !strings.HasPrefix(path, "/static/") && !strings.HasPrefix(path, "/logo.") && !strings.HasPrefix(path, "/favicon.") && path != "/logo.png" && path != "/favicon.ico" && !strings.HasPrefix(path, "/pay-") && !strings.HasPrefix(path, "/waffo-") && !strings.HasPrefix(path, "/yoomoney-") {
+		if !strings.HasPrefix(path, "/static/") && !strings.HasPrefix(path, "/logo.") && !strings.HasPrefix(path, "/favicon.") && !strings.HasPrefix(path, "/umin-") && path != "/logo.png" && path != "/favicon.ico" && !strings.HasPrefix(path, "/pay-") && !strings.HasPrefix(path, "/waffo-") && !strings.HasPrefix(path, "/yoomoney-") {
 			c.Next()
 			return
 		}
