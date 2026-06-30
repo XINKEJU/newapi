@@ -205,7 +205,6 @@ export function useOAuthLogin(status: SystemStatus | null) {
     } finally {
       setIsLoading(false)
     }
-  }
 
   }
 
