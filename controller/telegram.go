@@ -4,12 +4,16 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"sort"
+	"strings"
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/model"
+	"github.com/QuantumNous/new-api/setting/system_setting"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -96,6 +100,56 @@ func TelegramLogin(c *gin.Context) {
 		return
 	}
 	setupLogin(&user, c)
+}
+
+
+// TelegramOAuthRedirect redirects the browser to Telegram's OAuth page for login.
+// This is used as a fallback when the Telegram Login Widget fails to load.
+func TelegramOAuthRedirect(c *gin.Context) {
+	if !common.TelegramOAuthEnabled {
+		c.JSON(200, gin.H{
+			"message": "管理员未开启通过 Telegram 登录以及注册",
+			"success": false,
+		})
+		return
+	}
+
+	botToken := common.TelegramBotToken
+	if botToken == "" {
+		c.JSON(200, gin.H{
+			"message": "Telegram bot token not configured",
+			"success": false,
+		})
+		return
+	}
+
+	// Extract bot_id from token (format: <bot_id>:<hash>)
+	parts := strings.SplitN(botToken, ":", 2)
+	if len(parts) != 2 {
+		c.JSON(200, gin.H{
+			"message": "Invalid Telegram bot token",
+			"success": false,
+		})
+		return
+	}
+	botID := parts[0]
+
+	origin := system_setting.ServerAddress
+	if origin == "" {
+		scheme := "https"
+		if c.Request.TLS == nil {
+			scheme = "http"
+		}
+		origin = scheme + "://" + c.Request.Host
+	}
+
+	returnURL := origin + "/api/oauth/telegram/login"
+	oauthURL := fmt.Sprintf(
+		"https://oauth.telegram.org/auth?bot_id=%s&origin=%s&embed=0&request_access=write&return_to=%s",
+		botID, url.QueryEscape(origin), url.QueryEscape(returnURL),
+	)
+
+	c.Redirect(302, oauthURL)
 }
 
 func checkTelegramAuthorization(params map[string][]string, token string) bool {
