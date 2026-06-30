@@ -15,7 +15,7 @@ import (
 )
 
 // YooMoneyNotify 处理 YooMoney 异步通知（webhook）
-// 文档：https://yoomoney.ru/docs/payment-notifications/using/epay/notifications
+// 基于 YooMoney HTTP 通知协议（旧版快速支付表单回调）
 func YooMoneyNotify(c *gin.Context) {
 	var params map[string]string
 
@@ -63,19 +63,8 @@ func YooMoneyNotify(c *gin.Context) {
 		return
 	}
 
-	// 构造 YooMoneyNotification 用于验证
-	notif := &service.YooMoneyNotification{
-		NotificationType: params["notification_type"],
-		WalletId:         params["wallet_id"],
-		Amount:           params["amount"],
-		Currency:         params["currency"],
-		TransId:          params["transaction_id"],
-		Label:            params["label"],
-		Sha1Hash:         params["sha1_hash"],
-	}
-
-	if !service.VerifyYooMoneyNotification(notif, notificationSecret) {
-		common.SysError(fmt.Sprintf("YooMoney notify: signature verification failed, params: %+v", params))
+	if err := service.VerifyYooMoneyParams(params, notificationSecret); err != nil {
+		common.SysError(fmt.Sprintf("YooMoney notify: signature verification failed: %v, params: %+v", err, params))
 		c.String(http.StatusOK, "fail")
 		return
 	}
@@ -118,6 +107,8 @@ func YooMoneyNotify(c *gin.Context) {
 }
 
 // YooMoneyReturn 处理 YooMoney 支付后浏览器回跳
+// 注意：浏览器回跳不可靠（用户可能直接关闭页面），主要依赖 webhook
+// 这里的处理作为辅助回退，不替代 webhook 通知
 func YooMoneyReturn(c *gin.Context) {
 	params := lo.Reduce(lo.Keys(c.Request.URL.Query()), func(r map[string]string, t string, i int) map[string]string {
 		r[t] = c.Request.URL.Query().Get(t)
@@ -135,17 +126,8 @@ func YooMoneyReturn(c *gin.Context) {
 		return
 	}
 
-	notif := &service.YooMoneyNotification{
-		NotificationType: params["notification_type"],
-		WalletId:         params["wallet_id"],
-		Amount:           params["amount"],
-		Currency:         params["currency"],
-		TransId:          params["transaction_id"],
-		Label:            params["label"],
-		Sha1Hash:         params["sha1_hash"],
-	}
-
-	if !service.VerifyYooMoneyNotification(notif, notificationSecret) {
+	if err := service.VerifyYooMoneyParams(params, notificationSecret); err != nil {
+		common.SysError(fmt.Sprintf("YooMoney return: signature verification failed: %v", err))
 		c.Redirect(http.StatusFound, paymentReturnPath("/console/wallet?pay=fail"))
 		return
 	}
@@ -156,15 +138,21 @@ func YooMoneyReturn(c *gin.Context) {
 		return
 	}
 
-	// 完成订单
+	// 幂等处理：如果订单已经由 webhook 处理完成，直接重定向到成功页
 	if strings.HasPrefix(tradeNo, "YMSUB") || strings.HasPrefix(tradeNo, "SUB") {
 		LockOrder(tradeNo)
-		defer UnlockOrder(tradeNo)
-		_ = model.CompleteSubscriptionOrder(tradeNo, common.GetJsonString(params), model.PaymentProviderYoomoney, "yoomoney")
+		err := model.CompleteSubscriptionOrder(tradeNo, common.GetJsonString(params), model.PaymentProviderYoomoney, "yoomoney")
+		UnlockOrder(tradeNo)
+		if err != nil {
+			common.SysError("YooMoney return: complete subscription order failed: " + err.Error())
+		}
 	} else {
 		LockOrder(tradeNo)
-		defer UnlockOrder(tradeNo)
-		_ = model.RechargeYoomoney(tradeNo, c.ClientIP())
+		err := model.RechargeYoomoney(tradeNo, c.ClientIP())
+		UnlockOrder(tradeNo)
+		if err != nil {
+			common.SysError("YooMoney return: recharge failed: " + err.Error())
+		}
 	}
 
 	c.Redirect(http.StatusFound, paymentReturnPath("/console/wallet?pay=success"))

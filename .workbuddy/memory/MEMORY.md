@@ -23,4 +23,17 @@
 OpenAI, Claude, Gemini, DeepSeek, Baidu, Ali (Qwen), Zhipu, Tencent, Mistral, AWS Bedrock, Vertex AI, Ollama, Coze, Replicate, Suno, Kling, Jimeng, Vidu, Sora, MiniMax
 
 ## 支付系统
-Stripe, Epay (易支付), Waffo Pancake
+Stripe, Epay (易支付), Waffo Pancake, YooMoney
+
+## 生产部署
+- 域名：umniai.ru (IP: 170.168.89.127)
+- Nginx 反向代理：80/443 → new-api:3000
+- SSL：Let's Encrypt (certbot)
+- 生产配置：docker-compose.prod.yml
+- 部署脚本：deploy/ (init-ssl.sh, switch-https.sh, renew-ssl.sh)
+- Nginx 配置：nginx/ (umniai.ru.conf, umniai.ru.initial.conf)
+- ServerAddress 需在管理后台设置为 https://umniai.ru
+- TRUSTED_REDIRECT_DOMAINS=umniai.ru
+
+## 已知修复
+- **Yandex OAuth state 参数为空**: main.go 中 session cookie `SameSite` 从 `Strict` 改为 `Lax`，`Secure` 改为 `true`。原因：OAuth 回调来自跨站（yandex.ru → umniai.ru），Strict 模式下浏览器不发送 cookie，导致 oauth_state 从 session 读取为 nil。此修复同时影响所有 OAuth 提供商（GitHub/Discord/OIDC/LinuxDO/VK/Yandex）。
