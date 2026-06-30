@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>关于 Umin API — AI 模型聚合中转平台</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --card-bg: #f8fafc;
+    --text: #1e293b;
+    --text-secondary: #64748b;
+    --border: #e2e8f0;
+    --accent: #6366f1;
+    --accent-light: #eef2ff;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --radius: 12px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --border: #334155;
+      --accent: #818cf8;
+      --accent-light: #1e1b4b;
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  .hero {
+    text-align: center;
+    padding: 48px 24px 36px;
+    background: linear-gradient(135deg, var(--accent-light) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .hero .tagline {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px 48px;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 32px 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 22px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .feature-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+
+  .feature-card:hover { border-color: var(--accent); }
+
+  .feature-card .icon {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+
+  .feature-card h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .feature-card p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
+  .provider-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: var(--accent-light);
+    color: var(--accent);
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  th, td {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 0.88rem;
+  }
+
+  th {
+    background: var(--card-bg);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td { border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+
+  .footer-note {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    padding: 32px 0 16px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  .footer-note a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <img class="hero-logo" src="/static/umin-icon.png" alt="Umin API 图标" onerror="this.style.display='none'">
+  <h1>Umin API</h1>
+  <p class="tagline">新一代 AI 模型聚合中转平台 — 一个 API，连接 40+ 全球 AI 模型</p>
+</div>
+
+<div class="container">
+
+  <div class="section-title">平台简介</div>
+  <p>
+    <strong>Umin API</strong> (umniai.ru) 是一个基于开源项目
+    <a href="https://github.com/QuantumNous/new-api" target="_blank">New-API</a>
+    构建的 AI 模型聚合中转平台。我们为开发者、企业和研究机构提供统一的 API 网关，
+    通过单一接口访问 OpenAI、Claude、Gemini、DeepSeek、YandexGPT、GigaChat
+    等 40+ 全球 AI 大语言模型，大幅降低多模型接入的复杂度和成本。
+  </p>
+
+  <div class="section-title">核心功能</div>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon">🌐</div>
+      <h3>多模型聚合</h3>
+      <p>支持 40+ AI 提供商，涵盖 OpenAI、Anthropic、Google、Yandex、DeepSeek、阿里、百度等</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">💰</div>
+      <h3>计费与配额管理</h3>
+      <p>灵活的按量计费体系，支持多级配额、订阅计划，精确到 token 级别的用量统计</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🔐</div>
+      <h3>多认证方式</h3>
+      <p>支持邮箱注册、密钥认证、GitHub / Yandex / VK / Telegram / WeChat 等 OAuth 登录</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🌍</div>
+      <h3>多语言支持</h3>
+      <p>界面支持中文、英文、俄文、法文、日文、越南文，适配全球用户</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">⚡</div>
+      <h3>高性能网关</h3>
+      <p>基于 Go 语言构建，支持 SSE 流式响应、WebSocket、高并发请求处理</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🛡️</div>
+      <h3>安全可靠</h3>
+      <p>全站 HTTPS 加密、请求频率限制、IP 黑白名单、敏感词过滤等多层安全防护</p>
+    </div>
+  </div>
+
+  <div class="section-title">支持的 AI 提供商</div>
+  <div class="provider-badges">
+    <span class="badge">OpenAI</span>
+    <span class="badge">Claude (Anthropic)</span>
+    <span class="badge">Gemini (Google)</span>
+    <span class="badge">DeepSeek</span>
+    <span class="badge">YandexGPT</span>
+    <span class="badge">GigaChat</span>
+    <span class="badge">通义千问 (阿里)</span>
+    <span class="badge">文心一言 (百度)</span>
+    <span class="badge">智谱 GLM</span>
+    <span class="badge">腾讯混元</span>
+    <span class="badge">Mistral</span>
+    <span class="badge">Cohere</span>
+    <span class="badge">AWS Bedrock</span>
+    <span class="badge">Azure OpenAI</span>
+    <span class="badge">Ollama</span>
+    <span class="badge">Replicate</span>
+    <span class="badge">MiniMax</span>
+    <span class="badge">Moonshot</span>
+    <span class="badge">零一万物</span>
+    <span class="badge">Coze</span>
+    <span class="badge">Suno (音乐生成)</span>
+    <span class="badge">可灵 / 即梦 (视频)</span>
+    <span class="badge">Vidu / Sora</span>
+  </div>
+
+  <div class="section-title">支付方式</div>
+  <table>
+    <tr><th>支付渠道</th><th>支持地区</th><th>说明</th></tr>
+    <tr><td>Stripe</td><td>全球</td><td>支持 Visa / Mastercard / 国际卡</td></tr>
+    <tr><td>YooMoney (ЮMoney)</td><td>俄罗斯</td><td>支持俄罗斯银行卡、SberPay、QIWI</td></tr>
+    <tr><td>易支付 (Epay)</td><td>中国</td><td>支持微信支付、支付宝</td></tr>
+    <tr><td>Waffo Pancake</td><td>全球</td><td>加密货币支付网关</td></tr>
+  </table>
+
+  <div class="section-title">快速开始</div>
+  <ol style="padding-left: 20px; line-height: 2.2; color: var(--text-secondary); font-size: 0.9rem;">
+    <li><strong>注册账号</strong> — 使用邮箱或 OAuth 登录创建账户</li>
+    <li><strong>获取 API 密钥</strong> — 在控制台生成个人访问令牌</li>
+    <li><strong>配置模型渠道</strong> — 选择需要的 AI 模型并设置配额</li>
+    <li><strong>开始调用</strong> — 使用 OpenAI 兼容的 API 格式访问所有模型</li>
+  </ol>
+
+  <div class="section-title">技术栈</div>
+  <table>
+    <tr><th>层级</th><th>技术</th></tr>
+    <tr><td>后端</td><td>Go 1.25 + Gin + GORM (PostgreSQL / MySQL / SQLite)</td></tr>
+    <tr><td>缓存</td><td>Redis 7</td></tr>
+    <tr><td>前端</td><td>React 19 + TypeScript + TailwindCSS + Rsbuild</td></tr>
+    <tr><td>部署</td><td>Docker + Nginx + Let's Encrypt SSL</td></tr>
+    <tr><td>基础设施</td><td>CentOS 7, 域名 umniai.ru</td></tr>
+  </table>
+
+  <div class="footer-note">
+    <p>基于 <a href="https://github.com/XINKEJU/newapi" target="_blank">XINKEJU/new-api</a> 构建 © 2026 Umin API</p>
+    <p style="margin-top: 8px;">
+      <a href="/">首页</a> &nbsp;·&nbsp;
+      <a href="/pricing">定价</a> &nbsp;·&nbsp;
+      <a href="/about">关于</a>
+    </p>
+  </div>
+
+</div>
+
+</body>
+</html>
