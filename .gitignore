@@ -42,3 +42,7 @@ skills-lock.json
 
 # SSL private keys (never commit)
 nginx/certs/privkey.pem
+# Local-only live probes and scratch test workspaces.
+.local-tests/
+service/relayconvert/chat_responses_live_local_test.go
+service/openaicompat/chat_responses_live_local_test.go
