@@ -19,7 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { type SVGProps } from 'react'
 import { cn } from '@/lib/utils'
 
-export function IconTelegram({ className, ...props }: SVGProps<SVGSVGElement>) {
+export function IconYandex({ className, ...props }: SVGProps<SVGSVGElement>) {
   return (
     <svg
       role='img'
@@ -30,8 +30,8 @@ export function IconTelegram({ className, ...props }: SVGProps<SVGSVGElement>) {
       className={cn('[&>path]:fill-current', className)}
       {...props}
     >
-      <title>Telegram</title>
-      <path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.19.19 0 0 0-.05-.18c-.05-.03-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27.01.08.03.25.02.39z' />
+      <title>Yandex</title>
+      <path d='M13.06 21.99v-9.35l4.72-7H16L12.06 13 12 13l-.06-.06-4-7.36H5.46l4.6 6.93V22h3z' />
     </svg>
   )
 }
