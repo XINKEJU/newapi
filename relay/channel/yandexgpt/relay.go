@@ -1,13 +1,12 @@
 package yandexgpt
 
 import (
-	"encoding/json"
+	"github.com/QuantumNous/new-api/common"
 	"fmt"
 	"io"
 	"net/http"
 	"strconv"
 
-	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/dto"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
@@ -120,7 +119,7 @@ func yandexHandler(c *gin.Context, info *relaycommon.RelayInfo, resp *http.Respo
 
 	// Check for API-level error first.
 	var apiErr YandexErrorResponse
-	if json.Unmarshal(body, &apiErr) == nil && apiErr.Error.Message != "" {
+	if common.Unmarshal(body, &apiErr) == nil && apiErr.Error.Message != "" {
 		return types.NewError(
 			fmt.Errorf("yandexgpt error %d: %s", apiErr.Error.GRPCStatusCode, apiErr.Error.Message),
 			types.ErrorCodeBadResponseBody,
@@ -128,11 +127,11 @@ func yandexHandler(c *gin.Context, info *relaycommon.RelayInfo, resp *http.Respo
 	}
 
 	var yResp YandexChatResponse
-	if err := json.Unmarshal(body, &yResp); err != nil {
+	if err := common.Unmarshal(body, &yResp); err != nil {
 		return types.NewError(err, types.ErrorCodeBadResponseBody), nil
 	}
 	openAIResp := yandexResponse2OpenAI(info.UpstreamModelName, &yResp)
-	jsonResp, err := json.Marshal(openAIResp)
+	jsonResp, err := common.Marshal(openAIResp)
 	if err != nil {
 		return types.NewError(err, types.ErrorCodeBadResponseBody), nil
 	}

@@ -2,7 +2,6 @@ package oauth
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -86,7 +85,7 @@ func (p *VKProvider) ExchangeToken(ctx context.Context, code string, c *gin.Cont
 	logger.LogDebug(ctx, "[OAuth-VK] ExchangeToken response status: %d", res.StatusCode)
 
 	var tokenResp vkTokenResponse
-	if err := json.NewDecoder(res.Body).Decode(&tokenResp); err != nil {
+	if err := common.DecodeJson(res.Body, &tokenResp); err != nil {
 		logger.LogError(ctx, fmt.Sprintf("[OAuth-VK] ExchangeToken decode error: %s", err.Error()))
 		return nil, err
 	}
@@ -153,7 +152,7 @@ func (p *VKProvider) GetUserInfo(ctx context.Context, token *OAuthToken) (*OAuth
 	}
 
 	var usersResp vkUsersResponse
-	if err := json.NewDecoder(res.Body).Decode(&usersResp); err != nil {
+	if err := common.DecodeJson(res.Body, &usersResp); err != nil {
 		logger.LogError(ctx, fmt.Sprintf("[OAuth-VK] GetUserInfo decode error: %s", err.Error()))
 		return nil, err
 	}

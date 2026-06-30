@@ -2,7 +2,6 @@ package oauth
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -92,7 +91,7 @@ func (p *YandexProvider) ExchangeToken(ctx context.Context, code string, c *gin.
 	logger.LogDebug(ctx, "[OAuth-Yandex] ExchangeToken response status: %d", res.StatusCode)
 
 	var tokenResp yandexTokenResponse
-	if err := json.NewDecoder(res.Body).Decode(&tokenResp); err != nil {
+	if err := common.DecodeJson(res.Body, &tokenResp); err != nil {
 		logger.LogError(ctx, fmt.Sprintf("[OAuth-Yandex] ExchangeToken decode error: %s", err.Error()))
 		return nil, err
 	}
@@ -146,7 +145,7 @@ func (p *YandexProvider) GetUserInfo(ctx context.Context, token *OAuthToken) (*O
 	}
 
 	var yaUser yandexUserInfo
-	if err := json.NewDecoder(res.Body).Decode(&yaUser); err != nil {
+	if err := common.DecodeJson(res.Body, &yaUser); err != nil {
 		logger.LogError(ctx, fmt.Sprintf("[OAuth-Yandex] GetUserInfo decode error: %s", err.Error()))
 		return nil, err
 	}

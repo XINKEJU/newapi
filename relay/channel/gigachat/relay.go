@@ -3,14 +3,13 @@ package gigachat
 import (
 	"bytes"
 	"crypto/tls"
-	"encoding/json"
+	"github.com/QuantumNous/new-api/common"
 	"fmt"
 	"io"
 	"net/http"
 	"sync"
 	"time"
 
-	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/dto"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
@@ -81,7 +80,7 @@ func fetchToken(apiKey string) (string, error) {
 		return "", fmt.Errorf("gigachat: OAuth returned %d: %s", resp.StatusCode, string(respBody))
 	}
 	var tokenResp GigaChatTokenResponse
-	if err := json.Unmarshal(respBody, &tokenResp); err != nil {
+	if err := common.Unmarshal(respBody, &tokenResp); err != nil {
 		return "", err
 	}
 	expiresAt := time.UnixMilli(tokenResp.ExpiresAt)
@@ -175,14 +174,14 @@ func gigaChatHandler(c *gin.Context, info *relaycommon.RelayInfo, resp *http.Res
 	service.CloseResponseBodyGracefully(resp)
 
 	var gcResp GigaChatResponse
-	if err := json.Unmarshal(body, &gcResp); err != nil {
+	if err := common.Unmarshal(body, &gcResp); err != nil {
 		return types.NewError(err, types.ErrorCodeBadResponseBody), nil
 	}
 	if len(gcResp.Choices) == 0 {
 		return types.NewError(fmt.Errorf("gigachat: empty choices in response"), types.ErrorCodeBadResponseBody), nil
 	}
 	openAIResp := gigaChat2OpenAI(&gcResp)
-	jsonResp, err := json.Marshal(openAIResp)
+	jsonResp, err := common.Marshal(openAIResp)
 	if err != nil {
 		return types.NewError(err, types.ErrorCodeBadResponseBody), nil
 	}

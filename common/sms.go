@@ -1,7 +1,6 @@
 package common
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -78,7 +77,7 @@ func sendViaSMSRu(phone string, message string, config SMSConfig) error {
 	}
 
 	var smsResp SMSResponse
-	if err := json.Unmarshal(body, &smsResp); err != nil {
+	if err := Unmarshal(body, &smsResp); err != nil {
 		return fmt.Errorf("SMS.ru parse response failed: %w (body: %s)", err, string(body))
 	}
 

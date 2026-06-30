@@ -443,6 +443,38 @@ func (user *User) Insert(inviterId int) error {
 	return nil
 }
 
+
+// FinishInsert performs post-insertion tasks after the transaction commits.
+// This is the public entry point for non-transactional inserts (e.g., direct Insert()).
+func (user *User) FinishInsert(inviterId int) {
+	// 用户创建成功后，根据角色初始化边栏配置
+	var createdUser User
+	if err := DB.Where("id = ?", user.Id).First(&createdUser).Error; err == nil {
+		defaultSidebarConfig := generateDefaultSidebarConfigForRole(createdUser.Role)
+		if defaultSidebarConfig != "" {
+			currentSetting := createdUser.GetSetting()
+			currentSetting.SidebarModules = defaultSidebarConfig
+			createdUser.SetSetting(currentSetting)
+			createdUser.Update(false)
+			common.SysLog(fmt.Sprintf("为新用户 %s (角色: %d) 初始化边栏配置", createdUser.Username, createdUser.Role))
+		}
+	}
+
+	if common.QuotaForNewUser > 0 {
+		RecordLog(user.Id, LogTypeSystem, fmt.Sprintf("新用户注册赠送 %s", logger.LogQuota(common.QuotaForNewUser)))
+	}
+	if inviterId != 0 && operation_setting.IsPaymentComplianceConfirmed() {
+		if common.QuotaForInvitee > 0 {
+			_ = IncreaseUserQuota(user.Id, common.QuotaForInvitee, true)
+			RecordLog(user.Id, LogTypeSystem, fmt.Sprintf("使用邀请码赠送 %s", logger.LogQuota(common.QuotaForInvitee)))
+		}
+		if common.QuotaForInviter > 0 {
+			RecordLog(inviterId, LogTypeSystem, fmt.Sprintf("邀请用户赠送 %s", logger.LogQuota(common.QuotaForInviter)))
+			_ = inviteUser(inviterId)
+		}
+	}
+}
+
 // InsertWithTx inserts a new user within an existing transaction.
 // This is used for OAuth registration where user creation and binding need to be atomic.
 // Post-creation tasks (sidebar config, logs, inviter rewards) are handled after the transaction commits.
@@ -503,6 +535,13 @@ func (user *User) FinalizeOAuthUserCreation(inviterId int) {
 }
 
 func (user *User) Update(updatePassword bool) error {
+	if err := user.UpdateWithTx(DB, updatePassword); err != nil {
+		return err
+	}
+	return updateUserCache(*user)
+}
+
+func (user *User) UpdateWithTx(tx *gorm.DB, updatePassword bool) error {
 	var err error
 	if updatePassword {
 		user.Password, err = common.Password2Hash(user.Password)
@@ -511,16 +550,21 @@ func (user *User) Update(updatePassword bool) error {
 		}
 	}
 	newUser := *user
-	DB.First(&user, user.Id)
-	if err = DB.Model(user).Updates(newUser).Error; err != nil {
+	tx.First(&user, user.Id)
+	if err = tx.Model(user).Updates(newUser).Error; err != nil {
 		return err
 	}
-
-	// Update cache
-	return updateUserCache(*user)
+	return nil
 }
 
 func (user *User) Edit(updatePassword bool) error {
+	if err := user.EditWithTx(DB, updatePassword); err != nil {
+		return err
+	}
+	return updateUserCache(*user)
+}
+
+func (user *User) EditWithTx(tx *gorm.DB, updatePassword bool) error {
 	var err error
 	if updatePassword {
 		user.Password, err = common.Password2Hash(user.Password)
@@ -540,13 +584,11 @@ func (user *User) Edit(updatePassword bool) error {
 		updates["password"] = newUser.Password
 	}
 
-	DB.First(&user, user.Id)
-	if err = DB.Model(user).Updates(updates).Error; err != nil {
+	tx.First(&user, user.Id)
+	if err = tx.Model(user).Updates(updates).Error; err != nil {
 		return err
 	}
-
-	// Update cache
-	return updateUserCache(*user)
+	return nil
 }
 
 func (user *User) ClearBinding(bindingType string) error {
