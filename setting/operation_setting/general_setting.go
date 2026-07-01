@@ -28,9 +28,9 @@ var generalSetting = GeneralSetting{
 	DocsLink:                   "https://docs.newapi.pro",
 	PingIntervalEnabled:        false,
 	PingIntervalSeconds:        60,
-	QuotaDisplayType:           QuotaDisplayTypeUSD,
-	CustomCurrencySymbol:       "¤",
-	CustomCurrencyExchangeRate: 1.0,
+	QuotaDisplayType:           QuotaDisplayTypeCNY,
+	CustomCurrencySymbol:       "¥",
+	CustomCurrencyExchangeRate: 7.25,
 }
 
 func init() {

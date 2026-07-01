@@ -46,6 +46,7 @@ interface StatusApiResponse {
     cny_exchange_rate?: number
     rub_exchange_rate?: number
     usd_exchange_rate?: number
+    cny_rub_exchange_rate?: number
     custom_currency_symbol?: string
     custom_currency_exchange_rate?: number
   }
@@ -91,6 +92,14 @@ export function mapStatusDataToConfig(
     usdExchangeRate: toNumber(
       data.usd_exchange_rate,
       DEFAULT_CURRENCY_CONFIG.usdExchangeRate
+    ),
+    cnyUsdExchangeRate: toNumber(
+      data.usd_exchange_rate,
+      DEFAULT_CURRENCY_CONFIG.cnyUsdExchangeRate
+    ),
+    cnyRubExchangeRate: toNumber(
+      data.cny_rub_exchange_rate,
+      DEFAULT_CURRENCY_CONFIG.cnyRubExchangeRate
     ),
     customCurrencySymbol:
       data.custom_currency_symbol?.trim() ||

@@ -20,9 +20,10 @@ var EpayId = ""
 var EpayKey = ""
 var Price = 7.3 // 1 USD = X units of local currency (override via PRICE env or DB)
 var MinTopUp = 1
-var USDExchangeRate = 7.25    // 1 USD = 7.25 CNY（原值 90 是 RUB 汇率，现已拆分）
+var USDExchangeRate = 7.25    // 1 USD = 7.25 CNY（人民币对美元汇率）
 var CNYExchangeRate = 7.25    // 1 USD = X CNY
 var RUBExchangeRate = 90.0    // 1 USD = X RUB
+var CNYRUBExchangeRate = 0.08 // 1 RUB = X 元（人民币对卢布汇率）
 
 func init() {
 	// Price and exchange rate defaults — override via env for regional deployments
@@ -42,6 +43,12 @@ func init() {
 		if f, err := strconv.ParseFloat(v, 64); err == nil {
 			RUBExchangeRate = f
 			common.SysLog(fmt.Sprintf("env override: RUBExchangeRate = %.2f", f))
+		}
+	}
+	if v := os.Getenv("CNY_RUB_EXCHANGE_RATE"); v != "" {
+		if f, err := strconv.ParseFloat(v, 64); err == nil {
+			CNYRUBExchangeRate = f
+			common.SysLog(fmt.Sprintf("env override: CNYRUBExchangeRate = %.4f", f))
 		}
 	}
 	if v := os.Getenv("QUOTA_DISPLAY_TYPE"); v != "" {

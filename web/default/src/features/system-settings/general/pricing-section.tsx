@@ -60,6 +60,9 @@ const createPricingSchema = (t: (key: string) => string) =>
       USDExchangeRate: z.coerce
         .number()
         .min(0.0001, t('Exchange rate must be greater than 0')),
+      CNYRUBExchangeRate: z.coerce
+        .number()
+        .min(0.0001, t('Exchange rate must be greater than 0')),
       DisplayInCurrencyEnabled: z.boolean(),
       DisplayTokenStatEnabled: z.boolean(),
       general_setting: z.object({
@@ -191,8 +194,8 @@ export function PricingSection({ defaultValues }: PricingSectionProps) {
                   <FormLabel>{t('Display Mode')}</FormLabel>
                   <Select
                     items={[
-                      { value: 'USD', label: t('USD') },
                       { value: 'CNY', label: t('CNY') },
+                      { value: 'USD', label: t('USD') },
                       { value: 'RUB', label: t('RUB') },
                       { value: 'CUSTOM', label: t('Custom Currency') },
                       { value: 'TOKENS', label: t('Tokens Only') },
@@ -207,8 +210,8 @@ export function PricingSection({ defaultValues }: PricingSectionProps) {
                     </FormControl>
                     <SelectContent alignItemWithTrigger={false}>
                       <SelectGroup>
-                        <SelectItem value='USD'>{t('USD')}</SelectItem>
                         <SelectItem value='CNY'>{t('CNY')}</SelectItem>
+                        <SelectItem value='USD'>{t('USD')}</SelectItem>
                         <SelectItem value='RUB'>{t('RUB')}</SelectItem>
                         <SelectItem value='CUSTOM'>
                           {t('Custom Currency')}
@@ -230,36 +233,50 @@ export function PricingSection({ defaultValues }: PricingSectionProps) {
             />
 
             {displayType !== 'TOKENS' && (
-              <FormField
-                control={form.control}
-                name='USDExchangeRate'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {displayType === 'CNY'
-                        ? t('CNY per USD')
-                        : displayType === 'RUB'
-                          ? t('RUB per USD')
-                          : displayType === 'USD'
-                            ? t('USD Exchange Rate')
-                            : t('USD Exchange Rate')}
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type='number'
-                        step='0.01'
-                        {...safeNumberFieldProps(field)}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {t(
-                        'Real exchange rate between USD and your payment gateway currency'
-                      )}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className='grid gap-4 sm:grid-cols-2'>
+                <FormField
+                  control={form.control}
+                  name='USDExchangeRate'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('CNY-USD exchange rate')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='number'
+                          step='0.0001'
+                          {...safeNumberFieldProps(field)}
+                          placeholder='7.25'
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        {t('1 USD = X yuan (CNY)')}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='CNYRUBExchangeRate'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('CNY-RUB exchange rate')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='number'
+                          step='0.0001'
+                          {...safeNumberFieldProps(field)}
+                          placeholder='0.08'
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        {t('1 RUB = X yuan (CNY)')}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             )}
 
             {displayType === 'CUSTOM' && (

@@ -35,6 +35,10 @@ export interface CurrencyConfig {
   rubExchangeRate: number
   /** Legacy: exchange rate from USD to local currency (deprecated, use cny/rub specific rates) */
   usdExchangeRate: number
+  /** CNY-USD exchange rate: 1 USD = X 元 (人民币对美元汇率) */
+  cnyUsdExchangeRate: number
+  /** CNY-RUB exchange rate: 1 RUB = X 元 (人民币对卢布汇率) */
+  cnyRubExchangeRate: number
   /** Custom currency symbol configured by the admin (used when type === CUSTOM) */
   customCurrencySymbol: string
   /** Exchange rate from USD to the custom currency (used when type === CUSTOM) */
@@ -57,7 +61,9 @@ export const DEFAULT_CURRENCY_CONFIG: CurrencyConfig = {
   cnyExchangeRate: 7.25,
   rubExchangeRate: 90,
   usdExchangeRate: 7.25,
-  customCurrencySymbol: '¤',
+  cnyUsdExchangeRate: 7.25,
+  cnyRubExchangeRate: 0.08,
+  customCurrencySymbol: '¥',
   customCurrencyExchangeRate: 1,
 }
 

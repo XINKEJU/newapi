@@ -1,0 +1,7 @@
+{
+  "translation.Continue with VK": "使用 VK 继续",
+  "translation.Continue with Yandex": "使用 Yandex 继续",
+  "translation.Failed to start VK login": "启动 VK 登录失败",
+  "translation.Failed to start Yandex login": "启动 Yandex 登录失败",
+  "translation.Yandex OAuth is not properly configured": "Yandex OAuth 未正确配置"
+}
