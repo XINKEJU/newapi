@@ -1,7 +1,6 @@
 package ali
 
 import (
-	"encoding/json"
 	"io"
 	"net/http"
 
@@ -11,6 +10,8 @@ import (
 	"github.com/QuantumNous/new-api/types"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/QuantumNous/new-api/common"
 )
 
 func ConvertRerankRequest(request dto.RerankRequest) *AliRerankRequest {
@@ -40,7 +41,7 @@ func RerankHandler(c *gin.Context, resp *http.Response, info *relaycommon.RelayI
 	service.CloseResponseBodyGracefully(resp)
 
 	var aliResponse AliRerankResponse
-	err = json.Unmarshal(responseBody, &aliResponse)
+	err = common.Unmarshal(responseBody, &aliResponse)
 	if err != nil {
 		return types.NewOpenAIError(err, types.ErrorCodeBadResponseBody, http.StatusInternalServerError), nil
 	}
@@ -64,7 +65,7 @@ func RerankHandler(c *gin.Context, resp *http.Response, info *relaycommon.RelayI
 		Usage:   usage,
 	}
 
-	jsonResponse, err := json.Marshal(rerankResponse)
+	jsonResponse, err := common.Marshal(rerankResponse)
 	if err != nil {
 		return types.NewError(err, types.ErrorCodeBadResponseBody), nil
 	}

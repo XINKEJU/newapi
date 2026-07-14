@@ -67,6 +67,14 @@ func SetWebRouter(router *gin.Engine, assets ThemeAssets) {
 			return
 		}
 		fullPath := filepath.Join(getStaticDir(), path)
+		// 防止路径遍历攻击：验证清理后的路径仍在静态目录内
+		staticDir := getStaticDir()
+		absStatic, _ := filepath.Abs(staticDir)
+		absFull, _ := filepath.Abs(fullPath)
+		if absStatic == "" || absFull == "" || !strings.HasPrefix(absFull, absStatic) {
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
 		if info, err := os.Stat(fullPath); err == nil && !info.IsDir() {
 			c.Header("Cache-Control", "max-age=86400")
 			http.ServeFile(c.Writer, c.Request, fullPath)

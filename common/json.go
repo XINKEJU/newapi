@@ -44,6 +44,26 @@ func GetJsonType(data json.RawMessage) string {
 	}
 }
 
+// EncodeJson 将 v 编码为 JSON 并写入 writer
+func EncodeJson(w io.Writer, v any) error {
+	return json.NewEncoder(w).Encode(v)
+}
+
+// CompactJson 压缩 JSON
+func CompactJson(dst *bytes.Buffer, src []byte) error {
+	return json.Compact(dst, src)
+}
+
+// ValidJson 验证 JSON 是否合法
+func ValidJson(data []byte) bool {
+	return json.Valid(data)
+}
+
+// IndentJson 格式化缩进 JSON
+func IndentJson(dst *bytes.Buffer, src []byte, prefix, indent string) error {
+	return json.Indent(dst, src, prefix, indent)
+}
+
 // JsonRawMessageToString returns JSON strings as their decoded value and other JSON values as raw text.
 func JsonRawMessageToString(data json.RawMessage) string {
 	trimmed := bytes.TrimSpace(data)

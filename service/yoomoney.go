@@ -1,9 +1,13 @@
 package service
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -11,6 +15,10 @@ import (
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/setting"
 )
+
+// ============================================================================
+// 旧版 YooMoney Quick Pay 协议（向后兼容）
+// ============================================================================
 
 // YooMoneyQuickPayParams 封装 YooMoney 快速支付表单参数
 type YooMoneyQuickPayParams struct {
@@ -158,7 +166,7 @@ func VerifyYooMoneyParams(params map[string]string, notificationSecret string) e
 	return nil
 }
 
-// YooMoneyPaymentType 支付方式常量
+// YooMoneyPaymentType 支付方式常量（旧 Quick Pay 协议）
 const (
 	YooMoneyPaymentTypeWallet = "PC" // YooMoney 钱包
 	YooMoneyPaymentTypeCard   = "AC" // 银行卡（俄罗斯的 Visa/Mastercard 已不可用，仅 Mir）
@@ -166,7 +174,7 @@ const (
 	YooMoneyPaymentTypeSber   = "SB" // SberPay（通过 Sberbank Online）
 )
 
-// CreateYooMoneySubscriptionOrder 为 YooMoney 创建订阅订单
+// CreateYooMoneySubscriptionOrder 为 YooMoney 创建订阅订单（旧 Quick Pay 协议）
 // 返回支付重定向 URL
 func CreateYooMoneySubscriptionOrder(tradeNo string, amount float64, description string, returnURL string, notifyURL string) (payURL string, err error) {
 	cfgWalletId := setting.YoomoneyWalletId
@@ -194,7 +202,7 @@ func CreateYooMoneySubscriptionOrder(tradeNo string, amount float64, description
 	return payURL, nil
 }
 
-// CreateYooMoneyTopUpOrder 为 YooMoney 创建充值订单
+// CreateYooMoneyTopUpOrder 为 YooMoney 创建充值订单（旧 Quick Pay 协议）
 // 返回支付重定向 URL
 func CreateYooMoneyTopUpOrder(tradeNo string, amount float64, returnURL string) (payURL string, err error) {
 	cfgWalletId := setting.YoomoneyWalletId
@@ -215,4 +223,290 @@ func CreateYooMoneyTopUpOrder(tradeNo string, amount float64, returnURL string) 
 
 	payURL = BuildYooMoneyQuickPayURL(p)
 	return payURL, nil
+}
+
+// ============================================================================
+// YooKassa v3 REST API（新协议）
+// ============================================================================
+
+// YookassaAmount 金额结构
+type YookassaAmount struct {
+	Value    string `json:"value"`    // 金额，点号分隔字符串，如 "100.00"
+	Currency string `json:"currency"` // 货币代码 ISO-4217，如 "RUB"
+}
+
+// YookassaConfirmation 确认场景
+type YookassaConfirmation struct {
+	Type      string `json:"type"`       // 固定 "redirect"
+	ReturnURL string `json:"return_url"` // 支付后回跳地址
+}
+
+// YookassaPaymentRequest 创建支付请求体
+type YookassaPaymentRequest struct {
+	Amount        *YookassaAmount      `json:"amount"`
+	Description   string               `json:"description,omitempty"`
+	Confirmation  *YookassaConfirmation `json:"confirmation"`
+	Capture       bool                 `json:"capture"`
+	Metadata      map[string]string    `json:"metadata,omitempty"`
+	PaymentMethodData map[string]string `json:"payment_method_data,omitempty"`
+}
+
+// YookassaPaymentResponse 创建支付响应
+type YookassaPaymentResponse struct {
+	ID           string              `json:"id"`
+	Status       string              `json:"status"`
+	Paid         bool                `json:"paid"`
+	Amount       *YookassaAmount     `json:"amount"`
+	Confirmation *YookassaConfirmationResponse `json:"confirmation,omitempty"`
+	CreatedAt    string              `json:"created_at"`
+	Metadata     map[string]string   `json:"metadata,omitempty"`
+	Test         bool                `json:"test"`
+}
+
+// YookassaConfirmationResponse 确认场景响应（含 confirmation_url）
+type YookassaConfirmationResponse struct {
+	Type            string `json:"type"`
+	ConfirmationURL string `json:"confirmation_url"`
+	ReturnURL       string `json:"return_url,omitempty"`
+}
+
+// YookassaWebhookNotification YooKassa webhook 通知结构
+type YookassaWebhookNotification struct {
+	Type   string          `json:"type"`   // 固定 "notification"
+	Event  string          `json:"event"`  // 如 "payment.succeeded"
+	Object json.RawMessage `json:"object"` // 支付对象 JSON
+}
+
+// YookassaError YooKassa API 错误响应
+type YookassaError struct {
+	Type        string `json:"type"`
+	ID          string `json:"id"`
+	Code        string `json:"code"`
+	Description string `json:"description"`
+}
+
+func (e *YookassaError) Error() string {
+	return fmt.Sprintf("YooKassa API error: [%s] %s (id=%s)", e.Code, e.Description, e.ID)
+}
+
+// YookassaKnownIPs YooKassa webhook 来源 IP 白名单
+// https://yookassa.ru/developers/using-api/webhooks
+var YookassaKnownIPs = []string{
+	"185.71.76.0/27",
+	"185.71.77.0/27",
+	"77.75.153.0/25",
+	"77.75.156.11",
+	"77.75.156.35",
+	"77.75.154.128/25",
+	"2a02:5180::/32",
+}
+
+// createYookassaHTTPClient 创建带有 Basic Auth 的 HTTP 客户端
+func createYookassaHTTPClient() *http.Client {
+	return &http.Client{}
+}
+
+// createYookassaRequest 创建一个 YooKassa API 请求
+func createYookassaRequest(method, path string, body io.Reader) (*http.Request, error) {
+	apiEndpoint := setting.GetYookassaAPIEndpoint()
+	req, err := http.NewRequest(method, apiEndpoint+path, body)
+	if err != nil {
+		return nil, fmt.Errorf("创建 YooKassa 请求失败: %w", err)
+	}
+
+	// Basic Auth: shopId:secretKey
+	req.SetBasicAuth(setting.YoomoneyShopId, setting.YoomoneySecretKey)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+
+	// Idempotence-Key 由调用方设置
+
+	return req, nil
+}
+
+// CreateYookassaPayment 通过 YooKassa v3 API 创建支付
+// 返回确认 URL（confirmation_url）和支付 ID
+func CreateYookassaPayment(tradeNo string, amountRub float64, description string, returnURL string) (confirmationURL string, paymentID string, err error) {
+	shopID := setting.YoomoneyShopId
+	secretKey := setting.YoomoneySecretKey
+	if shopID == "" || secretKey == "" {
+		return "", "", fmt.Errorf("YooKassa shop_id 或 secret_key 未配置")
+	}
+
+	// 金额格式化为两位小数
+	amountStr := strconv.FormatFloat(amountRub, 'f', 2, 64)
+
+	reqBody := &YookassaPaymentRequest{
+		Amount: &YookassaAmount{
+			Value:    amountStr,
+			Currency: setting.YoomoneyCurrency,
+		},
+		Description: description,
+		Confirmation: &YookassaConfirmation{
+			Type:      "redirect",
+			ReturnURL: returnURL,
+		},
+		Capture: true, // 单阶段模式，立即扣款
+		Metadata: map[string]string{
+			"order_id": tradeNo,
+		},
+	}
+
+	bodyBytes, err := common.Marshal(reqBody)
+	if err != nil {
+		return "", "", fmt.Errorf("序列化请求体失败: %w", err)
+	}
+
+	req, err := createYookassaRequest("POST", "/payments", bytes.NewReader(bodyBytes))
+	if err != nil {
+		return "", "", err
+	}
+
+	// 设置幂等性 Key（使用 tradeNo 作为幂等 Key，确保同一订单不会重复创建）
+	req.Header.Set("Idempotence-Key", tradeNo)
+
+	resp, err := createYookassaHTTPClient().Do(req)
+	if err != nil {
+		return "", "", fmt.Errorf("YooKassa API 请求失败: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", "", fmt.Errorf("读取 YooKassa 响应失败: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		// 解析错误响应
+		var apiErr YookassaError
+		if common.Unmarshal(respBody, &apiErr) == nil && apiErr.Code != "" {
+			return "", "", &apiErr
+		}
+		return "", "", fmt.Errorf("YooKassa API 返回 HTTP %d: %s", resp.StatusCode, string(respBody))
+	}
+
+	var paymentResp YookassaPaymentResponse
+	if err := common.Unmarshal(respBody, &paymentResp); err != nil {
+		return "", "", fmt.Errorf("解析 YooKassa 响应失败: %w", err)
+	}
+
+	if paymentResp.Confirmation == nil || paymentResp.Confirmation.ConfirmationURL == "" {
+		return "", "", fmt.Errorf("YooKassa 响应缺少 confirmation_url")
+	}
+
+	common.SysLog(fmt.Sprintf("YooKassa payment created: id=%s, status=%s, tradeNo=%s", paymentResp.ID, paymentResp.Status, tradeNo))
+	return paymentResp.Confirmation.ConfirmationURL, paymentResp.ID, nil
+}
+
+// HandleYookassaWebhook 验证并处理 YooKassa webhook 通知
+// 返回 event 类型、支付对象、order_id（即 tradeNo）
+func HandleYookassaWebhook(body []byte) (event string, payment *YookassaPaymentResponse, orderID string, err error) {
+	var notification YookassaWebhookNotification
+	if err := common.Unmarshal(body, &notification); err != nil {
+		return "", nil, "", fmt.Errorf("解析 webhook 通知失败: %w", err)
+	}
+
+	if notification.Type != "notification" {
+		return "", nil, "", fmt.Errorf("非法的通知类型: %s", notification.Type)
+	}
+
+	var paymentObj YookassaPaymentResponse
+	if err := common.Unmarshal(notification.Object, &paymentObj); err != nil {
+		return "", nil, "", fmt.Errorf("解析支付对象失败: %w", err)
+	}
+
+	// 从 metadata 中提取 order_id
+	orderID = ""
+	if paymentObj.Metadata != nil {
+		orderID = paymentObj.Metadata["order_id"]
+	}
+
+	common.SysLog(fmt.Sprintf("YooKassa webhook received: event=%s, payment_id=%s, status=%s, order_id=%s",
+		notification.Event, paymentObj.ID, paymentObj.Status, orderID))
+
+	return notification.Event, &paymentObj, orderID, nil
+}
+
+// QueryYookassaPayment 查询 YooKassa 支付状态
+// 用于 webhook 验证（对象状态认证）
+func QueryYookassaPayment(paymentID string) (*YookassaPaymentResponse, error) {
+	req, err := createYookassaRequest("GET", "/payments/"+url.PathEscape(paymentID), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := createYookassaHTTPClient().Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("查询 YooKassa 支付状态失败: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("读取 YooKassa 响应失败: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		var apiErr YookassaError
+		if common.Unmarshal(respBody, &apiErr) == nil && apiErr.Code != "" {
+			return nil, &apiErr
+		}
+		return nil, fmt.Errorf("YooKassa API 返回 HTTP %d: %s", resp.StatusCode, string(respBody))
+	}
+
+	var paymentResp YookassaPaymentResponse
+	if err := common.Unmarshal(respBody, &paymentResp); err != nil {
+		return nil, fmt.Errorf("解析 YooKassa 响应失败: %w", err)
+	}
+
+	return &paymentResp, nil
+}
+
+// YookassaRefundRequest 退款请求体
+type YookassaRefundRequest struct {
+	Amount    *YookassaAmount `json:"amount"`
+	PaymentID string          `json:"payment_id"`
+}
+
+// CreateYookassaRefund 发起 YooKassa 退款
+func CreateYookassaRefund(paymentID string, amountRub float64) error {
+	amountStr := strconv.FormatFloat(amountRub, 'f', 2, 64)
+
+	reqBody := &YookassaRefundRequest{
+		Amount: &YookassaAmount{
+			Value:    amountStr,
+			Currency: setting.YoomoneyCurrency,
+		},
+		PaymentID: paymentID,
+	}
+
+	bodyBytes, err := common.Marshal(reqBody)
+	if err != nil {
+		return fmt.Errorf("序列化退款请求失败: %w", err)
+	}
+
+	req, err := createYookassaRequest("POST", "/refunds", bytes.NewReader(bodyBytes))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Idempotence-Key", common.GetUUID())
+
+	resp, err := createYookassaHTTPClient().Do(req)
+	if err != nil {
+		return fmt.Errorf("YooKassa 退款请求失败: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		var apiErr YookassaError
+		if common.Unmarshal(respBody, &apiErr) == nil && apiErr.Code != "" {
+			return &apiErr
+		}
+		return fmt.Errorf("YooKassa 退款返回 HTTP %d: %s", resp.StatusCode, string(respBody))
+	}
+
+	common.SysLog(fmt.Sprintf("YooKassa refund created: payment_id=%s, amount=%s RUB", paymentID, amountStr))
+	return nil
 }

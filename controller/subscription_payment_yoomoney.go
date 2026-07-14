@@ -15,10 +15,10 @@ import (
 
 type YooMoneyTopUpRequest struct {
 	Amount        int    `json:"amount"`
-	PaymentMethod string `json:"payment_method"` // 可选：PC/AC/MC，默认 PC
+	PaymentMethod string `json:"payment_method"` // 可选：PC/AC/MC，默认 PC（仅旧协议）
 }
 
-// RequestYooMoneyTopUp 发起 YooMoney 余额充值
+// RequestYooMoneyTopUp 发起 YooMoney / YooKassa 余额充值
 func RequestYooMoneyTopUp(c *gin.Context) {
 	if !requirePaymentCompliance(c) {
 		return
@@ -52,8 +52,8 @@ func RequestYooMoneyTopUp(c *gin.Context) {
 		return
 	}
 
-	// 使用美元金额存储，Amount 为美元数额
-	money := float64(req.Amount) // 前端传美元金额
+	// 金额转换：前端传入的是以 YooMoney 本地货币为单位的金额（默认 RUB）
+	money := float64(req.Amount) // 本地货币金额（如 RUB）
 	tradeNo := fmt.Sprintf("YM%d-%d-%s", userId, time.Now().UnixMilli(), randstr.String(6))
 
 	topUp := &model.TopUp{
@@ -74,7 +74,21 @@ func RequestYooMoneyTopUp(c *gin.Context) {
 	callBackAddress := service.GetCallbackAddress()
 	returnURL := callBackAddress + "/api/yoomoney/return"
 
-	payURL, err := service.CreateYooMoneyTopUpOrder(tradeNo, money, returnURL)
+	var payURL string
+
+	if setting.IsYookassaMode() {
+		// =============================================================
+		// YooKassa v3 REST API 模式
+		// =============================================================
+		description := fmt.Sprintf("余额充值 #%s", tradeNo)
+		payURL, _, err = service.CreateYookassaPayment(tradeNo, money, description, returnURL)
+	} else {
+		// =============================================================
+		// 旧 Quick Pay 协议模式
+		// =============================================================
+		payURL, err = service.CreateYooMoneyTopUpOrder(tradeNo, money, returnURL)
+	}
+
 	if err != nil {
 		_ = model.ExpireSubscriptionOrder(tradeNo, model.PaymentProviderYoomoney)
 		common.ApiErrorMsg(c, "拉起支付失败："+err.Error())
@@ -92,10 +106,10 @@ func RequestYooMoneyTopUp(c *gin.Context) {
 
 type YooMoneySubscriptionRequest struct {
 	PlanId        int    `json:"plan_id"`
-	PaymentMethod string `json:"payment_method"` // 可选
+	PaymentMethod string `json:"payment_method"` // 可选（旧协议）
 }
 
-// RequestYooMoneySubscription 发起 YooMoney 订阅购买
+// RequestYooMoneySubscription 发起 YooMoney / YooKassa 订阅购买
 func RequestYooMoneySubscription(c *gin.Context) {
 	if !requirePaymentCompliance(c) {
 		return
@@ -160,8 +174,22 @@ func RequestYooMoneySubscription(c *gin.Context) {
 	returnURL := callBackAddress + "/api/yoomoney/subscription/return"
 	notifyURL := callBackAddress + "/api/yoomoney/subscription/notify"
 
-	payURL, err := service.CreateYooMoneySubscriptionOrder(tradeNo, plan.PriceAmount,
-		fmt.Sprintf("订阅：%s", plan.Title), returnURL, notifyURL)
+	var payURL string
+
+	if setting.IsYookassaMode() {
+		// =============================================================
+		// YooKassa v3 REST API 模式
+		// =============================================================
+		description := fmt.Sprintf("订阅：%s", plan.Title)
+		payURL, _, err = service.CreateYookassaPayment(tradeNo, plan.PriceAmount, description, returnURL)
+	} else {
+		// =============================================================
+		// 旧 Quick Pay 协议模式
+		// =============================================================
+		payURL, err = service.CreateYooMoneySubscriptionOrder(tradeNo, plan.PriceAmount,
+			fmt.Sprintf("订阅：%s", plan.Title), returnURL, notifyURL)
+	}
+
 	if err != nil {
 		_ = model.ExpireSubscriptionOrder(tradeNo, model.PaymentProviderYoomoney)
 		common.ApiErrorMsg(c, "拉起支付失败："+err.Error())
@@ -171,8 +199,8 @@ func RequestYooMoneySubscription(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "success",
 		"data": gin.H{
-			"pay_url":   payURL,
-			"order_id":  tradeNo,
+			"pay_url":    payURL,
+			"order_id":   tradeNo,
 			"plan_title": plan.Title,
 		},
 	})

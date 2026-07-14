@@ -14,9 +14,92 @@ import (
 	"github.com/samber/lo"
 )
 
-// YooMoneyNotify 处理 YooMoney 异步通知（webhook）
-// 基于 YooMoney HTTP 通知协议（旧版快速支付表单回调）
+// YooMoneyNotify 处理 YooMoney / YooKassa 异步通知（webhook）
+// 支持两种协议：
+//   1. 旧 YooMoney Quick Pay 表单通知（form-encoded + SHA-1 签名）
+//   2. 新 YooKassa v3 REST API JSON webhook
 func YooMoneyNotify(c *gin.Context) {
+	contentType := c.GetHeader("Content-Type")
+
+	// =====================================================================
+	// 检测是否为 YooKassa JSON webhook
+	// =====================================================================
+	if strings.Contains(contentType, "application/json") || setting.IsYookassaMode() {
+		handleYookassaWebhook(c)
+		return
+	}
+
+	// =====================================================================
+	// 旧协议：YooMoney Quick Pay 表单通知
+	// =====================================================================
+	handleYoomoneyFormNotify(c)
+}
+
+// handleYookassaWebhook 处理 YooKassa v3 API JSON webhook 通知
+func handleYookassaWebhook(c *gin.Context) {
+	// 读取请求体
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		common.SysError("YooKassa webhook: read body failed: " + err.Error())
+		c.String(http.StatusBadRequest, "fail")
+		return
+	}
+
+	// 解析通知
+	event, paymentObj, orderID, err := service.HandleYookassaWebhook(body)
+	if err != nil {
+		common.SysError("YooKassa webhook: parse failed: " + err.Error())
+		c.String(http.StatusBadRequest, "fail")
+		return
+	}
+
+	// 只处理支付成功事件
+	if event != "payment.succeeded" {
+		common.SysLog(fmt.Sprintf("YooKassa webhook: ignoring event=%s, order_id=%s", event, orderID))
+		c.String(http.StatusOK, "success")
+		return
+	}
+
+	tradeNo := orderID
+	if tradeNo == "" {
+		common.SysError("YooKassa webhook: order_id missing in metadata")
+		c.String(http.StatusBadRequest, "fail")
+		return
+	}
+
+	// 根据订单号前缀判断是充值单还是订阅单
+	if strings.HasPrefix(tradeNo, "YMSUB") || strings.HasPrefix(tradeNo, "SUB") {
+		// 订阅订单
+		LockOrder(tradeNo)
+		defer UnlockOrder(tradeNo)
+
+		actualPaymentMethod := "yoomoney"
+		if paymentObj != nil && paymentObj.ID != "" {
+			actualPaymentMethod = "yookassa_" + strings.ReplaceAll(paymentObj.ID, "-", "")
+		}
+
+		if err := model.CompleteSubscriptionOrder(tradeNo, common.GetJsonString(body), model.PaymentProviderYoomoney, actualPaymentMethod); err != nil {
+			common.SysError("YooKassa webhook: complete subscription order failed: " + err.Error())
+			c.String(http.StatusOK, "fail")
+			return
+		}
+	} else {
+		// 充值订单
+		LockOrder(tradeNo)
+		defer UnlockOrder(tradeNo)
+
+		if err := model.RechargeYoomoney(tradeNo, c.ClientIP()); err != nil {
+			common.SysError("YooKassa webhook: recharge failed: " + err.Error())
+			c.String(http.StatusOK, "fail")
+			return
+		}
+	}
+
+	c.String(http.StatusOK, "success")
+}
+
+// handleYoomoneyFormNotify 处理旧 YooMoney Quick Pay 表单通知
+func handleYoomoneyFormNotify(c *gin.Context) {
 	var params map[string]string
 
 	if c.Request.Method == "POST" {
@@ -110,6 +193,15 @@ func YooMoneyNotify(c *gin.Context) {
 // 注意：浏览器回跳不可靠（用户可能直接关闭页面），主要依赖 webhook
 // 这里的处理作为辅助回退，不替代 webhook 通知
 func YooMoneyReturn(c *gin.Context) {
+	// YooKassa 模式下，成功页回跳直接重定向到钱包页
+	// 无需验证签名，YooKassa 会在 return_url 后附加 ?payment_id=xxx
+	// 真正的支付成功处理由 webhook 完成
+	if setting.IsYookassaMode() {
+		c.Redirect(http.StatusFound, paymentReturnPath("/console/wallet?pay=success"))
+		return
+	}
+
+	// 旧 Quick Pay 协议：验证 SHA-1 签名
 	params := lo.Reduce(lo.Keys(c.Request.URL.Query()), func(r map[string]string, t string, i int) map[string]string {
 		r[t] = c.Request.URL.Query().Get(t)
 		return r
@@ -161,4 +253,26 @@ func YooMoneyReturn(c *gin.Context) {
 // YooMoneySubscriptionReturn 处理订阅支付的浏览器回跳
 func YooMoneySubscriptionReturn(c *gin.Context) {
 	YooMoneyReturn(c)
+}
+
+// YookassaWebhookDebug 处理 YooKassa webhook 调试回跳（附加 payment_id 参数）
+// 当用户从 YooKassa 支付页返回时，YooKassa 会在 return_url 后附加查询参数
+// 此函数仅作日志记录，实际支付处理由 webhook 异步完成
+func YookassaWebhookDebug(c *gin.Context) {
+	paymentID := c.Query("payment_id")
+	if paymentID != "" {
+		common.SysLog(fmt.Sprintf("YooKassa return: payment_id=%s", paymentID))
+
+		// 异步查询支付状态作为日志（不阻塞响应）
+		go func() {
+			payment, err := service.QueryYookassaPayment(paymentID)
+			if err != nil {
+				common.SysError(fmt.Sprintf("YooKassa return: query payment failed: %v", err))
+				return
+			}
+			common.SysLog(fmt.Sprintf("YooKassa return: payment status=%s for payment_id=%s", payment.Status, paymentID))
+		}()
+	}
+
+	c.Redirect(http.StatusFound, paymentReturnPath("/console/wallet?pay=success"))
 }

@@ -28,6 +28,7 @@ type SystemStatus struct {
 }
 
 var latestSystemStatus atomic.Value
+var stopSystemMonitor chan struct{}
 
 func init() {
 	latestSystemStatus.Store(SystemStatus{})
@@ -35,8 +36,15 @@ func init() {
 
 // StartSystemMonitor 启动系统监控
 func StartSystemMonitor() {
+	stopSystemMonitor = make(chan struct{})
 	go func() {
 		for {
+			select {
+			case <-stopSystemMonitor:
+				return
+			default:
+			}
+
 			config := GetPerformanceMonitorConfig()
 			if !config.Enabled {
 				time.Sleep(30 * time.Second)
@@ -47,6 +55,13 @@ func StartSystemMonitor() {
 			time.Sleep(5 * time.Second)
 		}
 	}()
+}
+
+// StopSystemMonitor 停止系统监控
+func StopSystemMonitor() {
+	if stopSystemMonitor != nil {
+		close(stopSystemMonitor)
+	}
 }
 
 func updateSystemStatus() {

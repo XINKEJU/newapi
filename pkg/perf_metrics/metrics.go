@@ -402,7 +402,10 @@ func recordRedis(key bucketKey, sample Sample) {
 		pipe.HIncrBy(ctx, redisKey, "gen_ms", sample.GenerationMs)
 	}
 	pipe.Expire(ctx, redisKey, time.Hour)
-	_, _ = pipe.Exec(ctx)
+	_, err := pipe.Exec(ctx)
+	if err != nil {
+		common.SysError("perf_metrics: redis pipe exec failed: " + err.Error())
+	}
 }
 
 func mergeRedisActiveBuckets(merged map[bucketKey]counters, params QueryParams, startTs int64, endTs int64) {

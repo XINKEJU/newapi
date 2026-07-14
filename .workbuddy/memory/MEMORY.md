@@ -25,6 +25,14 @@ OpenAI, Claude, Gemini, DeepSeek, Baidu, Ali (Qwen), Zhipu, Tencent, Mistral, AW
 ## 支付系统
 Stripe, Epay (易支付), Waffo Pancake, YooMoney
 
+## 货币系统约定
+- **基准货币**: 人民币元 (CNY)，默认展示类型为 CNY
+- **汇率输入**: 管理后台 "Pricing & Display" 中有两个独立汇率输入框
+  - 人民币-美元汇率 (1 USD = X 元)，后端字段 `USDExchangeRate`
+  - 人民币-卢布汇率 (1 RUB = X 元)，后端字段 `CNYRUBExchangeRate`
+- **内部记账**: 仍以 USD 为单位 (QuotaPerUnit = 500000 quota = 1 USD)
+- **环境变量**: `CNY_RUB_EXCHANGE_RATE` 可覆盖卢布汇率默认值
+
 ## 生产部署
 - 域名：umniai.ru (IP: 170.168.89.127)
 - Nginx 反向代理：80/443 → new-api:3000

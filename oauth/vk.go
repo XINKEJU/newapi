@@ -125,11 +125,13 @@ func (p *VKProvider) GetUserInfo(ctx context.Context, token *OAuthToken) (*OAuth
 		email = em
 	}
 
-	url := fmt.Sprintf("https://api.vk.com/method/users.get?access_token=%s&v=5.131&fields=photo_100", token.AccessToken)
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	// Use Authorization header instead of URL query parameter for security
+	// (VK API 5.131+ supports Bearer token in Authorization header)
+	req, err := http.NewRequestWithContext(ctx, "GET", "https://api.vk.com/method/users.get?v=5.131&fields=photo_100", nil)
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set("Authorization", "Bearer "+token.AccessToken)
 
 	client := http.Client{Timeout: 20 * time.Second}
 	res, err := client.Do(req)
