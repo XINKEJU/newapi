@@ -171,12 +171,16 @@ func main() {
 	server.Use(middleware.I18n())
 	middleware.SetUpLogger(server)
 	// Initialize session store
+	sessionSecure := true
+	if os.Getenv("SESSION_SECURE") == "false" {
+		sessionSecure = false
+	}
 	store := cookie.NewStore([]byte(common.SessionSecret))
 	store.Options(sessions.Options{
 		Path:     "/",
 		MaxAge:   2592000, // 30 days
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   sessionSecure,
 		SameSite: http.SameSiteLaxMode,
 	})
 	server.Use(sessions.Sessions("session", store))
